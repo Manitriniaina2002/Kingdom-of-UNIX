@@ -19,8 +19,8 @@ export const COLORS = {
   terminalInfo: '#60A5FA',
   
   // Game UI colors
-  primary: '#8B5CF6',
-  primaryLight: '#A78BFA',
+  primary: '#00b603',
+  primaryLight: '#33c436',
   secondary: '#06B6D4',
   accent: '#F59E0B',
   gold: '#FFD700',
@@ -44,7 +44,7 @@ export const COLORS = {
   zoneMountain: '#6366F1',
   
   // XP and Level
-  xpBar: '#8B5CF6',
+  xpBar: '#00b603',
   xpBarBg: '#374151',
   levelBadge: '#FFD700',
 };

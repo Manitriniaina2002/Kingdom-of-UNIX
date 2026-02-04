@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Animated,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
@@ -50,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
   const handleStartGame = () => {
     startGame();
     setShowWelcome(false);
-    navigation.navigate('WorldMap');
+    navigation.getParent()?.navigate('Map');
   };
 
   // Get current progress
@@ -105,7 +106,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <TouchableOpacity 
             style={styles.settingsButton}
-            onPress={() => navigation.navigate('Settings')}
+            onPress={() => navigation.getParent()?.navigate('Profile')}
           >
             <Text style={styles.settingsIcon}>⚙️</Text>
           </TouchableOpacity>
@@ -113,7 +114,7 @@ const HomeScreen = ({ navigation }) => {
 
         {/* Player Stats */}
         <PlayerStatsBar 
-          onProfilePress={() => navigation.navigate('Profile')}
+          onProfilePress={() => navigation.getParent()?.navigate('Profile')}
         />
 
         <ScrollView 
@@ -122,10 +123,13 @@ const HomeScreen = ({ navigation }) => {
         >
           {/* Welcome Banner */}
           <View style={styles.welcomeBanner}>
-            <Text style={styles.welcomeEmoji}>{level.icon}</Text>
+            <Image 
+              source={require('../../../assets/Me.png')}
+              style={styles.welcomePhoto}
+            />
             <View style={styles.welcomeContent}>
               <Text style={styles.welcomeTitle}>
-                Welcome back, {level.title}!
+                Welcome back, Adventurer!
               </Text>
               <Text style={styles.welcomeText}>
                 {completedCount === 0 
@@ -185,7 +189,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.actionsGrid}>
               <TouchableOpacity 
                 style={styles.actionCard}
-                onPress={() => navigation.navigate('WorldMap')}
+                onPress={() => navigation.getParent()?.navigate('Map')}
               >
                 <Text style={styles.actionIcon}>🗺️</Text>
                 <Text style={styles.actionTitle}>World Map</Text>
@@ -194,7 +198,7 @@ const HomeScreen = ({ navigation }) => {
 
               <TouchableOpacity 
                 style={styles.actionCard}
-                onPress={() => navigation.navigate('Practice')}
+                onPress={() => navigation.getParent()?.navigate('Practice')}
               >
                 <Text style={styles.actionIcon}>💻</Text>
                 <Text style={styles.actionTitle}>Practice</Text>
@@ -203,7 +207,7 @@ const HomeScreen = ({ navigation }) => {
 
               <TouchableOpacity 
                 style={styles.actionCard}
-                onPress={() => navigation.navigate('Commands')}
+                onPress={() => navigation.getParent()?.navigate('Profile')}
               >
                 <Text style={styles.actionIcon}>📖</Text>
                 <Text style={styles.actionTitle}>Commands</Text>
@@ -212,7 +216,7 @@ const HomeScreen = ({ navigation }) => {
 
               <TouchableOpacity 
                 style={styles.actionCard}
-                onPress={() => navigation.navigate('Achievements')}
+                onPress={() => navigation.getParent()?.navigate('Profile')}
               >
                 <Text style={styles.actionIcon}>🏆</Text>
                 <Text style={styles.actionTitle}>Achievements</Text>
@@ -316,9 +320,13 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
   },
-  welcomeEmoji: {
-    fontSize: 32,
+  welcomePhoto: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     marginRight: SPACING.md,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
   },
   welcomeContent: {
     flex: 1,

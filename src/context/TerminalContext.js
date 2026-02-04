@@ -277,6 +277,16 @@ export function TerminalProvider({ children }) {
     dispatch({ type: ACTIONS.RESET_TERMINAL });
   }, []);
 
+  // Set filesystem directly
+  const setFilesystem = useCallback((filesystem) => {
+    dispatch({ type: ACTIONS.UPDATE_FILESYSTEM, payload: filesystem });
+  }, []);
+
+  // Set current path directly
+  const setCurrentPath = useCallback((path) => {
+    dispatch({ type: ACTIONS.UPDATE_PATH, payload: path });
+  }, []);
+
   // Get quest duration in seconds
   const getQuestDuration = useCallback(() => {
     if (!state.questStartTime) return 0;
@@ -295,6 +305,8 @@ export function TerminalProvider({ children }) {
     advanceObjective,
     useHint,
     resetTerminal,
+    setFilesystem,
+    setCurrentPath,
     getQuestDuration,
   };
 
