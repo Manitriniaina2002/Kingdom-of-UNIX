@@ -1,0 +1,386 @@
+/**
+ * Zone Screen - Displays a specific zone with its quests
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+import { useGame } from '../../context/GameContext';
+import { ZONES } from '../../data/zones';
+import { QUESTS, isQuestUnlocked } from '../../data/quests';
+import Header from '../../components/Common/Header';
+import QuestCard from '../../components/Quest/QuestCard';
+import DialogBox from '../../components/Dialog/DialogBox';
+
+const ZoneScreen = ({ route, navigation }) => {
+  const { zoneId } = route.params;
+  const insets = useSafeAreaInsets();
+  const { completedQuests, isZoneUnlocked, setCurrentZone, getZoneProgress } = useGame();
+  const [showIntro, setShowIntro] = useState(false);
+
+  const zone = ZONES[zoneId];
+  const zoneQuests = zone?.quests.map(qId => QUESTS[qId]).filter(Boolean) || [];
+  const progress = getZoneProgress(zoneId);
+
+  useEffect(() => {
+    if (zone) {
+      setCurrentZone(zoneId);
+      
+      // Show intro for first visit to a zone
+      const hasCompletedAnyQuest = zone.quests.some(qId => completedQuests.includes(qId));
+      if (!hasCompletedAnyQuest) {
+        setShowIntro(true);
+      }
+    }
+  }, [zoneId]);
+
+  if (!zone) {
+    return (
+      <View style={styles.container}>
+        <Header title="Zone Not Found" showBack onLeftPress={() => navigation.goBack()} />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>This zone doesn't exist.</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const handleQuestPress = (quest) => {
+    const canStart = isQuestUnlocked(quest.id, completedQuests);
+    if (canStart) {
+      navigation.navigate('Quest', { questId: quest.id });
+    }
+  };
+
+  return (
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <Header
+        title={zone.name}
+        subtitle={`${progress}% Complete`}
+        showBack
+        onLeftPress={() => navigation.goBack()}
+        rightIcon={zone.icon}
+      />
+
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Zone Header Card */}
+        <View style={[styles.zoneHeader, { backgroundColor: zone.color + '20' }]}>
+          <View style={styles.zoneIconContainer}>
+            <Text style={styles.zoneIcon}>{zone.icon}</Text>
+          </View>
+          <Text style={styles.zoneDescription}>{zone.description}</Text>
+          
+          {/* Commands taught in this zone */}
+          <View style={styles.commandsSection}>
+            <Text style={styles.commandsTitle}>Commands You'll Learn:</Text>
+            <View style={styles.commandsList}>
+              {zone.commands.map((cmd, index) => (
+                <View key={index} style={styles.commandTag}>
+                  <Text style={styles.commandText}>{cmd}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Progress Bar */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${progress}%`, backgroundColor: zone.color }
+                ]} 
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {zone.quests.filter(qId => completedQuests.includes(qId)).length}/{zone.quests.length} Quests Completed
+            </Text>
+          </View>
+        </View>
+
+        {/* Story Character */}
+        {zone.story && (
+          <TouchableOpacity 
+            style={styles.npcCard}
+            onPress={() => setShowIntro(true)}
+          >
+            <View style={styles.npcAvatar}>
+              <Text style={styles.npcEmoji}>{zone.story.characterEmoji}</Text>
+            </View>
+            <View style={styles.npcContent}>
+              <Text style={styles.npcName}>{zone.story.character}</Text>
+              <Text style={styles.npcRole}>Zone Guide</Text>
+            </View>
+            <Text style={styles.npcTalk}>💬 Talk</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Quests Section */}
+        <View style={styles.questsSection}>
+          <Text style={styles.sectionTitle}>📜 Quests</Text>
+          
+          {zoneQuests.map((quest, index) => {
+            const isCompleted = completedQuests.includes(quest.id);
+            const isLocked = !isQuestUnlocked(quest.id, completedQuests);
+            
+            return (
+              <View key={quest.id} style={styles.questItem}>
+                <View style={styles.questNumber}>
+                  <Text style={styles.questNumberText}>{index + 1}</Text>
+                  {index < zoneQuests.length - 1 && (
+                    <View style={[
+                      styles.questLine,
+                      isCompleted && styles.questLineCompleted,
+                    ]} />
+                  )}
+                </View>
+                <View style={styles.questCardContainer}>
+                  <QuestCard
+                    quest={quest}
+                    isCompleted={isCompleted}
+                    isLocked={isLocked}
+                    onPress={() => handleQuestPress(quest)}
+                  />
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Zone Completion Reward */}
+        {progress === 100 && (
+          <View style={styles.completionCard}>
+            <Text style={styles.completionIcon}>🏆</Text>
+            <Text style={styles.completionTitle}>Zone Complete!</Text>
+            <Text style={styles.completionText}>
+              You've mastered all quests in {zone.name}!
+            </Text>
+          </View>
+        )}
+
+        <View style={{ height: SPACING.xxxl }} />
+      </ScrollView>
+
+      {/* Zone Intro Dialog */}
+      {zone.story && (
+        <DialogBox
+          visible={showIntro}
+          character={zone.story.characterEmoji}
+          characterName={zone.story.character}
+          message={zone.story.intro}
+          onClose={() => setShowIntro(false)}
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.lg,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  zoneHeader: {
+    margin: SPACING.md,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceLight,
+  },
+  zoneIconContainer: {
+    alignSelf: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    ...SHADOWS.medium,
+  },
+  zoneIcon: {
+    fontSize: 40,
+  },
+  zoneDescription: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.md,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: SPACING.lg,
+  },
+  commandsSection: {
+    marginBottom: SPACING.lg,
+  },
+  commandsTitle: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.sm,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+  commandsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  commandTag: {
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.round,
+    margin: SPACING.xs,
+  },
+  commandText: {
+    color: COLORS.terminalText,
+    fontFamily: 'monospace',
+    fontSize: FONTS.sizes.sm,
+  },
+  progressSection: {
+    marginTop: SPACING.md,
+  },
+  progressBar: {
+    height: 10,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.round,
+    overflow: 'hidden',
+    marginBottom: SPACING.xs,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: BORDER_RADIUS.round,
+  },
+  progressText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+    textAlign: 'center',
+  },
+  npcCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.lg,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  npcAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  npcEmoji: {
+    fontSize: 24,
+  },
+  npcContent: {
+    flex: 1,
+  },
+  npcName: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.md,
+    fontWeight: FONTS.weights.bold,
+  },
+  npcRole: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+  },
+  npcTalk: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights.bold,
+  },
+  questsSection: {
+    paddingHorizontal: SPACING.md,
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.xl,
+    fontWeight: FONTS.weights.bold,
+    marginBottom: SPACING.lg,
+  },
+  questItem: {
+    flexDirection: 'row',
+  },
+  questNumber: {
+    alignItems: 'center',
+    marginRight: SPACING.md,
+    paddingTop: SPACING.md,
+  },
+  questNumberText: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights.bold,
+    textAlign: 'center',
+    lineHeight: 28,
+    overflow: 'hidden',
+  },
+  questLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: COLORS.surfaceLight,
+    marginTop: SPACING.xs,
+    marginBottom: -SPACING.md,
+  },
+  questLineCompleted: {
+    backgroundColor: COLORS.success,
+  },
+  questCardContainer: {
+    flex: 1,
+  },
+  completionCard: {
+    margin: SPACING.md,
+    padding: SPACING.xl,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+  },
+  completionIcon: {
+    fontSize: 48,
+    marginBottom: SPACING.md,
+  },
+  completionTitle: {
+    color: COLORS.gold,
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: FONTS.weights.bold,
+    marginBottom: SPACING.sm,
+  },
+  completionText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.md,
+    textAlign: 'center',
+  },
+});
+
+export default ZoneScreen;
