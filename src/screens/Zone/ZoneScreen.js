@@ -18,6 +18,7 @@ import { QUESTS, isQuestUnlocked } from '../../data/quests';
 import Header from '../../components/Common/Header';
 import QuestCard from '../../components/Quest/QuestCard';
 import DialogBox from '../../components/Dialog/DialogBox';
+import { GameIcon } from '../../utils/icons';
 
 const ZoneScreen = ({ route, navigation }) => {
   const { zoneId } = route.params;
@@ -66,7 +67,7 @@ const ZoneScreen = ({ route, navigation }) => {
         subtitle={`${progress}% Complete`}
         showBack
         onLeftPress={() => navigation.goBack()}
-        rightIcon={zone.icon}
+        rightIcon=""
       />
 
       <ScrollView 
@@ -76,7 +77,7 @@ const ZoneScreen = ({ route, navigation }) => {
         {/* Zone Header Card */}
         <View style={[styles.zoneHeader, { backgroundColor: zone.color + '20' }]}>
           <View style={styles.zoneIconContainer}>
-            <Text style={styles.zoneIcon}>{zone.icon}</Text>
+            <GameIcon name={zone.icon} size={40} color={zone.color || COLORS.primary} />
           </View>
           <Text style={styles.zoneDescription}>{zone.description}</Text>
           
@@ -115,19 +116,19 @@ const ZoneScreen = ({ route, navigation }) => {
             onPress={() => setShowIntro(true)}
           >
             <View style={styles.npcAvatar}>
-              <Text style={styles.npcEmoji}>{zone.story.characterEmoji}</Text>
+              <GameIcon name={zone.story.characterEmoji} size={24} color={COLORS.primary} />
             </View>
             <View style={styles.npcContent}>
               <Text style={styles.npcName}>{zone.story.character}</Text>
               <Text style={styles.npcRole}>Zone Guide</Text>
             </View>
-            <Text style={styles.npcTalk}>💬 Talk</Text>
+            <Text style={styles.npcTalk}>Talk</Text>
           </TouchableOpacity>
         )}
 
         {/* Quests Section */}
         <View style={styles.questsSection}>
-          <Text style={styles.sectionTitle}>📜 Quests</Text>
+          <Text style={styles.sectionTitle}><GameIcon name="quest" size={20} color={COLORS.primary} /> Quests</Text>
           
           {zoneQuests.map((quest, index) => {
             const isCompleted = completedQuests.includes(quest.id);
@@ -160,7 +161,7 @@ const ZoneScreen = ({ route, navigation }) => {
         {/* Zone Completion Reward */}
         {progress === 100 && (
           <View style={styles.completionCard}>
-            <Text style={styles.completionIcon}>🏆</Text>
+            <GameIcon name="achievement" size={48} color={COLORS.gold} />
             <Text style={styles.completionTitle}>Zone Complete!</Text>
             <Text style={styles.completionText}>
               You've mastered all quests in {zone.name}!
@@ -175,8 +176,8 @@ const ZoneScreen = ({ route, navigation }) => {
       {zone.story && (
         <DialogBox
           visible={showIntro}
-          character={zone.story.characterEmoji}
-          characterName={zone.story.character}
+          characterImage={require('../../../assets/me.png')}
+          characterName="Manitriniaina"
           message={zone.story.intro}
           onClose={() => setShowIntro(false)}
         />

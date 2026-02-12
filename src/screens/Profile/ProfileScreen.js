@@ -16,12 +16,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { usePlayer } from '../../context/PlayerContext';
 import { useGame } from '../../context/GameContext';
-import { ACHIEVEMENTS, LEVELS, LEVEL_TITLES } from '../../data/achievements';
+import { ACHIEVEMENTS, LEVELS } from '../../data/achievements';
 import { COMMANDS } from '../../data/commands';
 import Header from '../../components/Common/Header';
 import Card from '../../components/Common/Card';
 import Badge, { AchievementCard } from '../../components/Badge/Badge';
 import Button from '../../components/Common/Button';
+import { GameIcon } from '../../utils/icons';
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -29,14 +30,13 @@ const ProfileScreen = ({ navigation }) => {
     xp, 
     gold, 
     level, 
-    achievements, 
-    learnedCommands, 
+    unlockedAchievements, 
+    uniqueCommandsUsed, 
     totalPlayTime,
     soundEnabled,
     hintsEnabled,
-    toggleSound,
-    toggleHints,
-    resetProgress,
+    updateSettings,
+    resetPlayer,
   } = usePlayer();
   const { 
     completedQuests, 
@@ -46,11 +46,22 @@ const ProfileScreen = ({ navigation }) => {
 
   const [activeTab, setActiveTab] = useState('stats');
 
+  // level is an object: { level: 1, title: 'Terminal Newbie', icon: '🌱', xpRequired: 0 }
+  const levelNum = level?.level || 1;
+  const levelTitle = level?.title || 'Unknown';
+  const levelIcon = level?.icon || 'lvl1';
+
   // Calculate progress
-  const currentLevelXP = LEVELS.find(l => l.level === level)?.xpRequired || 0;
-  const nextLevelXP = LEVELS.find(l => l.level === level + 1)?.xpRequired || currentLevelXP;
-  const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-  const levelTitle = LEVEL_TITLES[level] || 'Unknown';
+  const currentLevelXP = level?.xpRequired || 0;
+  const nextLevelData = LEVELS.find(l => l.level === levelNum + 1);
+  const nextLevelXP = nextLevelData?.xpRequired || currentLevelXP;
+  const xpProgress = nextLevelXP > currentLevelXP 
+    ? ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100 
+    : 100;
+
+  // Alias for cleaner code
+  const achievements = unlockedAchievements || [];
+  const learnedCommands = uniqueCommandsUsed || [];
 
   // Get all achievements with unlock status
   const allAchievements = Object.values(ACHIEVEMENTS).map(cat => 
@@ -90,7 +101,7 @@ const ProfileScreen = ({ navigation }) => {
                   text: 'Delete Everything', 
                   style: 'destructive', 
                   onPress: () => {
-                    resetProgress();
+                    resetPlayer();
                     resetGameProgress();
                     Alert.alert('Progress Reset', 'Your progress has been reset. Start your journey anew!');
                   }
@@ -109,14 +120,14 @@ const ProfileScreen = ({ navigation }) => {
       <Card style={styles.levelCard}>
         <View style={styles.levelHeader}>
           <View style={styles.levelBadge}>
-            <Text style={styles.levelNumber}>{level}</Text>
+            <Text style={styles.levelNumber}>{levelNum}</Text>
           </View>
           <View style={styles.levelInfo}>
             <Text style={styles.levelTitle}>{levelTitle}</Text>
             <Text style={styles.xpText}>{xp.toLocaleString()} XP</Text>
           </View>
           <View style={styles.goldBox}>
-            <Text style={styles.goldIcon}>💰</Text>
+            <GameIcon name="gold" size={16} color={COLORS.gold} style={{ marginRight: SPACING.xs }} />
             <Text style={styles.goldAmount}>{gold}</Text>
           </View>
         </View>
@@ -124,29 +135,29 @@ const ProfileScreen = ({ navigation }) => {
           <View style={[styles.xpFill, { width: `${Math.min(xpProgress, 100)}%` }]} />
         </View>
         <Text style={styles.xpNeeded}>
-          {nextLevelXP - xp} XP to Level {level + 1}
+          {nextLevelXP - xp} XP to Level {levelNum + 1}
         </Text>
       </Card>
 
       {/* Stats Grid */}
       <View style={styles.statsGrid}>
         <Card style={styles.statCard}>
-          <Text style={styles.statIcon}>⚔️</Text>
+          <GameIcon name="challenge" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{completedQuests.length}</Text>
           <Text style={styles.statLabel}>Quests</Text>
         </Card>
         <Card style={styles.statCard}>
-          <Text style={styles.statIcon}>🗺️</Text>
+          <GameIcon name="map" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{unlockedZones.length}</Text>
           <Text style={styles.statLabel}>Zones</Text>
         </Card>
         <Card style={styles.statCard}>
-          <Text style={styles.statIcon}>🏆</Text>
+          <GameIcon name="achievement" size={24} color={COLORS.gold} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{unlockedCount}</Text>
           <Text style={styles.statLabel}>Badges</Text>
         </Card>
         <Card style={styles.statCard}>
-          <Text style={styles.statIcon}>⌨️</Text>
+          <GameIcon name="keyboard" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{learnedCommands.length}</Text>
           <Text style={styles.statLabel}>Commands</Text>
         </Card>
@@ -188,7 +199,7 @@ const ProfileScreen = ({ navigation }) => {
       {/* Play Time */}
       <Card style={styles.timeCard}>
         <View style={styles.timeRow}>
-          <Text style={styles.timeIcon}>⏱️</Text>
+          <GameIcon name="streak" size={28} color={COLORS.warning} />
           <View>
             <Text style={styles.timeLabel}>Total Play Time</Text>
             <Text style={styles.timeValue}>{formatPlayTime(totalPlayTime)}</Text>
@@ -202,7 +213,7 @@ const ProfileScreen = ({ navigation }) => {
     <View>
       {/* Achievement Progress */}
       <Card style={styles.achievementProgress}>
-        <Text style={styles.cardTitle}>🏆 Achievements</Text>
+        <Text style={styles.cardTitle}><GameIcon name="achievement" size={16} color={COLORS.gold} /> Achievements</Text>
         <Text style={styles.achievementCount}>
           {unlockedCount} / {totalAchievements} Unlocked
         </Text>
@@ -238,16 +249,16 @@ const ProfileScreen = ({ navigation }) => {
     <View>
       {/* Preferences */}
       <Card style={styles.settingsCard}>
-        <Text style={styles.cardTitle}>⚙️ Preferences</Text>
+        <Text style={styles.cardTitle}><GameIcon name="settings" size={16} color={COLORS.textSecondary} /> Preferences</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingIcon}>🔊</Text>
+            <GameIcon name="sound" size={18} color={COLORS.primary} />
             <Text style={styles.settingLabel}>Sound Effects</Text>
           </View>
           <Switch
             value={soundEnabled}
-            onValueChange={toggleSound}
+            onValueChange={() => updateSettings({ soundEnabled: !soundEnabled })}
             trackColor={{ false: COLORS.surfaceLight, true: COLORS.primary + '80' }}
             thumbColor={soundEnabled ? COLORS.primary : COLORS.textSecondary}
           />
@@ -255,12 +266,12 @@ const ProfileScreen = ({ navigation }) => {
 
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingIcon}>💡</Text>
+            <GameIcon name="hint" size={18} color={COLORS.warning} />
             <Text style={styles.settingLabel}>Show Hints</Text>
           </View>
           <Switch
             value={hintsEnabled}
-            onValueChange={toggleHints}
+            onValueChange={() => updateSettings({ hintsEnabled: !hintsEnabled })}
             trackColor={{ false: COLORS.surfaceLight, true: COLORS.primary + '80' }}
             thumbColor={hintsEnabled ? COLORS.primary : COLORS.textSecondary}
           />
@@ -269,7 +280,7 @@ const ProfileScreen = ({ navigation }) => {
 
       {/* About */}
       <Card style={styles.settingsCard}>
-        <Text style={styles.cardTitle}>📱 About</Text>
+        <Text style={styles.cardTitle}><GameIcon name="terminal" size={16} color={COLORS.textSecondary} /> About</Text>
         <View style={styles.aboutRow}>
           <Text style={styles.aboutLabel}>Version</Text>
           <Text style={styles.aboutValue}>1.0.0</Text>
@@ -282,7 +293,7 @@ const ProfileScreen = ({ navigation }) => {
 
       {/* Danger Zone */}
       <Card style={[styles.settingsCard, styles.dangerCard]}>
-        <Text style={styles.dangerTitle}>⚠️ Danger Zone</Text>
+        <Text style={styles.dangerTitle}>Danger Zone</Text>
         <Text style={styles.dangerText}>
           Resetting your progress will delete all XP, gold, achievements, and quest progress.
         </Text>
@@ -290,7 +301,6 @@ const ProfileScreen = ({ navigation }) => {
           title="Reset All Progress"
           onPress={handleResetProgress}
           variant="danger"
-          icon="🗑️"
         />
       </Card>
     </View>
@@ -302,22 +312,21 @@ const ProfileScreen = ({ navigation }) => {
       <Header
         title="Profile"
         subtitle={levelTitle}
-        rightIcon="⚔️"
       />
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
         {[
-          { key: 'stats', label: 'Stats', icon: '📊' },
-          { key: 'achievements', label: 'Badges', icon: '🏆' },
-          { key: 'settings', label: 'Settings', icon: '⚙️' },
+          { key: 'stats', label: 'Stats', iconName: 'progress' },
+          { key: 'achievements', label: 'Badges', iconName: 'achievement' },
+          { key: 'settings', label: 'Settings', iconName: 'settings' },
         ].map(tab => (
           <TouchableOpacity
             key={tab.key}
             style={[styles.tab, activeTab === tab.key && styles.activeTab]}
             onPress={() => setActiveTab(tab.key)}
           >
-            <Text style={styles.tabIcon}>{tab.icon}</Text>
+            <GameIcon name={tab.iconName} size={16} color={activeTab === tab.key ? COLORS.primary : COLORS.textSecondary} />
             <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
               {tab.label}
             </Text>

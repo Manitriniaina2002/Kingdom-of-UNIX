@@ -14,7 +14,7 @@ const initialState = {
   history: [
     {
       type: 'system',
-      content: '🏰 Welcome to the Kingdom of UNIX Terminal!',
+      content: 'Welcome to the Kingdom of UNIX Terminal!',
       timestamp: Date.now(),
     },
     {
@@ -82,7 +82,7 @@ function terminalReducer(state, action) {
         ...state,
         history: [{
           type: 'system',
-          content: '🧹 Terminal cleared',
+          content: 'Terminal cleared',
           timestamp: Date.now(),
         }],
       };
@@ -252,13 +252,13 @@ export function TerminalProvider({ children }) {
       type: ACTIONS.START_QUEST_MODE,
       payload: { questId, filesystem, startPath },
     });
-    addOutput('system', '📜 Quest mode activated! Follow the objectives to complete the quest.');
+    addOutput('system', 'Quest mode activated! Follow the objectives to complete the quest.');
   }, [addOutput]);
 
   // End quest mode
   const endQuestMode = useCallback(() => {
     dispatch({ type: ACTIONS.END_QUEST_MODE });
-    addOutput('system', '🏁 Quest mode ended.');
+    addOutput('system', 'Quest mode ended.');
   }, [addOutput]);
 
   // Advance to next objective
@@ -269,7 +269,7 @@ export function TerminalProvider({ children }) {
   // Use a hint
   const useHint = useCallback((hint) => {
     dispatch({ type: ACTIONS.USE_HINT });
-    addOutput('hint', `💡 Hint: ${hint}`);
+    addOutput('hint', `Hint: ${hint}`);
   }, [addOutput]);
 
   // Reset terminal

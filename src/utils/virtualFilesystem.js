@@ -34,7 +34,7 @@ export const createVirtualFilesystem = () => {
       permissions: '-rw-r--r--',
       owner: 'adventurer',
       group: 'adventurer',
-      content: `🏰 Welcome to the Kingdom of UNIX! 🏰
+      content: `=== Welcome to the Kingdom of UNIX! ===
 
 You are an adventurer who has just arrived in our magical realm.
 Here, knowledge of the ancient UNIX commands will guide your path.
@@ -44,7 +44,7 @@ to navigate our lands using commands like 'ls', 'cd', and 'pwd'.
 
 May your terminal always compile, and your paths always resolve!
 
-- Elder Directory, Guardian of the Village`,
+- Manitriniaina, Guardian of the Village`,
       size: 412,
     },
     '/home/adventurer/notes.txt': {
@@ -167,7 +167,7 @@ echo "May your code be bug-free!"`,
       permissions: '-rw-r--r--',
       owner: 'innkeeper',
       group: 'tavern',
-      content: `🍺 The Compiling Cauldron - Menu 🍺
+      content: `=== The Compiling Cauldron - Menu ===
 
 Today's Specials:
   Binary Brew        - 5 gold
@@ -219,7 +219,7 @@ misorganized directories. Only a true file master can defeat it!"
       permissions: '-rw-r--r--',
       owner: 'librarian',
       group: 'library',
-      content: `📚 Welcome to the Village Library 📚
+      content: `=== Welcome to the Village Library ===
 
 Here you will find scrolls of knowledge about UNIX commands.
 Browse the 'basics' section to start your learning journey.
@@ -273,7 +273,7 @@ rm    - Remove files/directories
         rm file.txt
         rm -r folder/  (for directories)
         
-⚠️ Warning: rm is permanent!`,
+Warning: rm is permanent!`,
       size: 278,
     },
     '/home/adventurer/library/basics/tips.txt': {
@@ -306,7 +306,7 @@ what happens. This is a safe space.`,
       permissions: '-rw-r--r--',
       owner: 'librarian',
       group: 'library',
-      content: `🔮 Ancient Wisdom of the UNIX Masters 🔮
+      content: `=== Ancient Wisdom of the UNIX Masters ===
 
 "In the beginning, there was the command line..."
 
@@ -347,7 +347,7 @@ but with great power comes great responsibility!`,
       permissions: '-rw-r--r--',
       owner: 'blacksmith',
       group: 'crafters',
-      content: `⚒️ The Binary Blacksmith ⚒️
+      content: `=== The Binary Blacksmith ===
 
 "I forge scripts into executables!"
 

@@ -202,7 +202,7 @@ function executeLs(filesystem, currentPath, args, hasFlag) {
     if (name === '.' || name === '..') return name + '/';
     const itemPath = targetPath === '/' ? `/${name}` : `${targetPath}/${name}`;
     const node = filesystem[itemPath];
-    return node?.type === 'directory' ? `📁 ${name}/` : `📄 ${name}`;
+    return node?.type === 'directory' ? `[DIR] ${name}/` : `[FILE] ${name}`;
   });
   
   return {
@@ -349,7 +349,7 @@ function executeMkdir(filesystem, currentPath, positionalArgs, hasFlag) {
   
   return {
     success: results.length === 0,
-    output: results.join('\n') || `📁 Created directory${positionalArgs.length > 1 ? 'ies' : ''}!`,
+    output: results.join('\n') || `Created directory${positionalArgs.length > 1 ? 'ies' : ''}!`,
     newFilesystem: newFs,
   };
 }
@@ -389,7 +389,7 @@ function executeRm(filesystem, currentPath, positionalArgs, hasFlag) {
   
   return {
     success: results.length === 0,
-    output: results.join('\n') || '🗑️ Removed successfully!',
+    output: results.join('\n') || 'Removed successfully!',
     newFilesystem: newFs,
   };
 }
@@ -443,7 +443,7 @@ function executeChmod(filesystem, currentPath, args) {
   
   return {
     success: true,
-    output: `🔐 Permissions updated: ${newPermissions}`,
+    output: `Permissions updated: ${newPermissions}`,
     newFilesystem: newFs,
   };
 }
@@ -466,7 +466,7 @@ function executeChown(filesystem, currentPath, args) {
   // Simulate chown - in real UNIX this requires root
   return {
     success: true,
-    output: '👑 Ownership change simulated! (Note: In real UNIX, this requires administrator privileges)',
+    output: 'Ownership change simulated! (Note: In real UNIX, this requires administrator privileges)',
   };
 }
 
@@ -505,7 +505,7 @@ function executeHelp(positionalArgs) {
     const cmdInfo = getCommand(cmdName);
     
     if (cmdInfo) {
-      let output = `📚 ${cmdInfo.name} - ${cmdInfo.fullName}\n\n`;
+      let output = `${cmdInfo.name} - ${cmdInfo.fullName}\n\n`;
       output += `${cmdInfo.description}\n\n`;
       output += `Usage: ${cmdInfo.syntax}\n\n`;
       output += `${cmdInfo.funExplanation}\n`;
@@ -537,37 +537,37 @@ function executeHelp(positionalArgs) {
     };
   }
   
-  const output = `🏰 Kingdom of UNIX - Command Help 🏰
+  const output = `Kingdom of UNIX - Command Help
 
-📂 Navigation:
+[NAV] Navigation:
   pwd        Show current directory
   ls         List files and directories
   cd         Change directory
   tree       Show directory tree
 
-📄 Files:
+[FILES] Files:
   cat        Display file contents
   mkdir      Create directory
   rm         Remove files/directories
   touch      Create empty file
 
-🔐 Permissions:
+[LOCK] Permissions:
   chmod      Change file permissions
   chown      Change file owner
   stat       Show file details
 
-⚙️ Processes:
+[PROC] Processes:
   ps         Show running processes
   top        Live process viewer
   kill       Stop a process
 
-🔧 Utilities:
+[TOOLS] Utilities:
   echo       Print text
   whoami     Show current user
   clear      Clear terminal
   help       Show this help
 
-💡 Tip: Type "help <command>" for detailed info!
+[TIP] Tip: Type "help <command>" for detailed info!
 Example: help ls`;
 
   return { success: true, output };
@@ -599,7 +599,7 @@ function executePs(hasFlag) {
 }
 
 function executeTop() {
-  const output = `📊 Process Monitor (Simulated)
+  const output = `Process Monitor (Simulated)
 
 Tasks:  5 total,   1 running,   4 sleeping
 Memory: 4096 MB total, 2048 MB free
@@ -612,7 +612,7 @@ Uptime: 1 day, 3 hours, 42 minutes
   456 system     0.1  0.5    quest_manager
     1 root       0.0  0.1    init
 
-💡 In real UNIX, press 'q' to quit top
+[TIP] In real UNIX, press 'q' to quit top
 (This is a simulation - command completed)`;
 
   return { success: true, output };
@@ -640,7 +640,7 @@ function executeKill(args) {
   const signalName = signal === '-9' ? 'SIGKILL' : 'SIGTERM';
   return {
     success: true,
-    output: `🎯 Signal ${signalName} sent to process ${pid}\n(Simulated - process would be terminated in real UNIX)`,
+    output: `Signal ${signalName} sent to process ${pid}\n(Simulated - process would be terminated in real UNIX)`,
   };
 }
 
@@ -657,7 +657,7 @@ function executeGrep(args, filesystem, currentPath) {
   if (args.length === 1) {
     return {
       success: true,
-      output: `🔍 grep: searching for "${pattern}"\n(Provide a file to search, or pipe from another command)`,
+      output: `grep: searching for "${pattern}"\n(Provide a file to search, or pipe from another command)`,
     };
   }
   
@@ -720,7 +720,7 @@ function executeTouch(filesystem, currentPath, positionalArgs) {
   // Simplified touch - just acknowledge
   return {
     success: true,
-    output: `📄 File${positionalArgs.length > 1 ? 's' : ''} touched!`,
+    output: `File${positionalArgs.length > 1 ? 's' : ''} touched!`,
   };
 }
 
@@ -755,21 +755,21 @@ Change: 2026-02-04 12:00:00.000000000 +0000`;
 function executeUnknown(command) {
   // Fun responses for unknown commands
   const responses = [
-    `🤔 Command '${command}' not found. This spell is not in our grimoire!`,
-    `❓ Unknown command '${command}'. Type 'help' to see available commands.`,
-    `🔮 The crystal ball doesn't recognize '${command}'. Try 'help'!`,
+    `Command '${command}' not found. This spell is not in our grimoire!`,
+    `Unknown command '${command}'. Type 'help' to see available commands.`,
+    `The crystal ball doesn't recognize '${command}'. Try 'help'!`,
   ];
   
   // Special easter eggs
   const easterEggs = {
-    'sudo': '🔒 Nice try! In the Kingdom of UNIX, everyone is equal (mostly).',
-    'rm -rf /': '💀 Whoa there! That would destroy the entire kingdom! Request denied.',
-    'vim': '📝 Ah, the legendary editor! But this terminal is too humble for such power.',
-    'emacs': '⌨️ A fine choice! But we keep things simple here in the village.',
-    'exit': '🚪 You can\'t exit the Kingdom that easily! You\'re on an adventure!',
-    'hack': '🕵️ There\'s nothing to hack here - this is a learning environment!',
-    'hello': '👋 Hello, adventurer! Welcome to the Kingdom of UNIX!',
-    'hi': '👋 Hi there! Ready to learn some commands?',
+    'sudo': 'Nice try! In the Kingdom of UNIX, everyone is equal (mostly).',
+    'rm -rf /': 'Whoa there! That would destroy the entire kingdom! Request denied.',
+    'vim': 'Ah, the legendary editor! But this terminal is too humble for such power.',
+    'emacs': 'A fine choice! But we keep things simple here in the village.',
+    'exit': 'You can\'t exit the Kingdom that easily! You\'re on an adventure!',
+    'hack': 'There\'s nothing to hack here - this is a learning environment!',
+    'hello': 'Hello, adventurer! Welcome to the Kingdom of UNIX!',
+    'hi': 'Hi there! Ready to learn some commands?',
   };
   
   if (easterEggs[command]) {

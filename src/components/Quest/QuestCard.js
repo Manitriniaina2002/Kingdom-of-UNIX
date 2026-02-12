@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+import { GameIcon } from '../../utils/icons';
 
 const QuestCard = ({
   quest,
@@ -38,19 +39,19 @@ const QuestCard = ({
   const getTypeIcon = () => {
     switch (quest.type) {
       case 'tutorial':
-        return '📖';
+        return 'tutorial';
       case 'exploration':
-        return '🧭';
+        return 'exploration';
       case 'learning':
-        return '📚';
+        return 'guide';
       case 'puzzle':
-        return '🧩';
+        return 'quest';
       case 'challenge':
-        return '⚔️';
+        return 'challenge';
       case 'boss':
-        return '🐉';
+        return 'boss';
       default:
-        return '📜';
+        return 'questDefault';
     }
   };
 
@@ -71,9 +72,9 @@ const QuestCard = ({
         disabled={isLocked}
         activeOpacity={0.7}
       >
-        <Text style={styles.compactIcon}>
-          {isLocked ? '🔒' : isCompleted ? '✅' : getTypeIcon()}
-        </Text>
+        <View style={[styles.compactIcon, { justifyContent: 'center', alignItems: 'center' }]}>
+          {isLocked ? <GameIcon name="locked" size={20} color={COLORS.textMuted} /> : isCompleted ? <GameIcon name="complete" size={20} color={COLORS.success} /> : <GameIcon name={getTypeIcon()} size={20} color={COLORS.primary} />}
+        </View>
         <View style={styles.compactContent}>
           <Text style={[styles.compactTitle, isLocked && styles.lockedText]}>
             {quest.name}
@@ -102,9 +103,7 @@ const QuestCard = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <Text style={styles.icon}>
-            {isLocked ? '🔒' : isCompleted ? '✅' : getTypeIcon()}
-          </Text>
+          {isLocked ? <GameIcon name="locked" size={24} color={COLORS.textMuted} /> : isCompleted ? <GameIcon name="complete" size={24} color={COLORS.success} /> : <GameIcon name={getTypeIcon()} size={24} color={COLORS.primary} />}
         </View>
         <View style={styles.headerContent}>
           <Text style={[styles.title, isLocked && styles.lockedText]}>
@@ -141,24 +140,24 @@ const QuestCard = ({
       {/* Footer */}
       <View style={styles.footer}>
         <View style={styles.rewards}>
-          <Text style={styles.rewardText}>⭐ {quest.xpReward} XP</Text>
-          <Text style={styles.rewardText}>💰 {quest.goldReward} Gold</Text>
+          <Text style={styles.rewardText}><GameIcon name="xp" size={14} color={COLORS.gold} /> {quest.xpReward} XP</Text>
+          <Text style={styles.rewardText}><GameIcon name="gold" size={14} color={COLORS.gold} /> {quest.goldReward} Gold</Text>
         </View>
         <View style={styles.timeEstimate}>
-          <Text style={styles.timeText}>⏱️ {quest.estimatedTime}</Text>
+          <Text style={styles.timeText}>{quest.estimatedTime}</Text>
         </View>
       </View>
 
       {/* Status Indicator */}
       {isCompleted && (
         <View style={styles.completedBanner}>
-          <Text style={styles.completedText}>✨ COMPLETED</Text>
+          <Text style={styles.completedText}>COMPLETED</Text>
         </View>
       )}
 
       {isActive && (
         <View style={styles.activeBanner}>
-          <Text style={styles.activeText}>▶ IN PROGRESS</Text>
+          <Text style={styles.activeText}>IN PROGRESS</Text>
         </View>
       )}
     </TouchableOpacity>

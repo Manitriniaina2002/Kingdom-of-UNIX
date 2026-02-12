@@ -1,20 +1,30 @@
 /**
  * Player Context - Player stats, XP, achievements, and inventory
+ * Persistence via SQLite (expo-sqlite)
  */
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { ACHIEVEMENTS, getLevelForXP, getLevelProgress, getXPForNextLevel } from '../data/achievements';
+import {
+  openDatabase,
+  loadPlayerProfile,
+  savePlayerProfile,
+  loadPlayerCommands,
+  recordCommandUsage,
+  loadAchievements,
+  insertAchievement,
+  loadBadges,
+  insertBadge,
+  resetPlayerData,
+} from '../database/db';
 
 const PlayerContext = createContext();
-
-const STORAGE_KEY = '@kingdom_unix_player_state';
 
 // Initial state
 const initialState = {
   // Profile
-  playerName: 'Adventurer',
-  avatar: '🧙',
+  playerName: 'ATRIKA',
+  avatar: '',
   createdAt: null,
   
   // Stats
@@ -184,16 +194,26 @@ function playerReducer(state, action) {
 // Provider component
 export function PlayerProvider({ children }) {
   const [state, dispatch] = useReducer(playerReducer, initialState);
+  const dbRef = useRef(null);
 
-  // Load saved state on mount
+  // Open database & load saved state on mount
   useEffect(() => {
-    loadPlayerState();
+    (async () => {
+      try {
+        const db = await openDatabase();
+        dbRef.current = db;
+        await loadPlayerStateFromDB(db);
+      } catch (error) {
+        console.error('Error initialising player database:', error);
+        dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
+      }
+    })();
   }, []);
 
-  // Save state whenever relevant fields change
+  // Persist to SQLite whenever relevant fields change
   useEffect(() => {
-    if (!state.isLoading) {
-      savePlayerState();
+    if (!state.isLoading && dbRef.current) {
+      savePlayerStateToDB(dbRef.current, state);
     }
   }, [
     state.playerName,
@@ -212,46 +232,52 @@ export function PlayerProvider({ children }) {
     state.hintsEnabled,
   ]);
 
-  const loadPlayerState = async () => {
+  const loadPlayerStateFromDB = async (db) => {
     try {
-      const savedState = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedState) {
-        const parsed = JSON.parse(savedState);
-        dispatch({ type: ACTIONS.LOAD_STATE, payload: parsed });
-      } else {
-        dispatch({ 
-          type: ACTIONS.LOAD_STATE, 
-          payload: { createdAt: new Date().toISOString() } 
-        });
-      }
+      // Profile row
+      const profile = await loadPlayerProfile(db);
+
+      // Commands
+      const cmdRows = await loadPlayerCommands(db);
+      const uniqueCommandsUsed = cmdRows.map(r => r.command);
+      const commandUsageCount = {};
+      cmdRows.forEach(r => { commandUsageCount[r.command] = r.usage_count; });
+
+      // Achievements & badges
+      const achRows = await loadAchievements(db);
+      const badgeRows = await loadBadges(db);
+
+      dispatch({
+        type: ACTIONS.LOAD_STATE,
+        payload: {
+          // Always force default playerName
+          avatar: profile.avatar || '',
+          createdAt: profile.created_at,
+          xp: profile.xp,
+          gold: profile.gold,
+          totalCommandsExecuted: profile.total_commands_executed,
+          soundEnabled: !!profile.sound_enabled,
+          hintsEnabled: !!profile.hints_enabled,
+          currentStreak: profile.current_streak,
+          lastPlayDate: profile.last_play_date,
+          totalPlayTime: profile.total_play_time,
+          uniqueCommandsUsed,
+          commandUsageCount,
+          unlockedAchievements: achRows.map(r => r.achievement_id),
+          badges: badgeRows.map(r => r.badge_id),
+        },
+      });
     } catch (error) {
-      console.error('Error loading player state:', error);
-      dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
+      console.error('Error loading player state from SQLite:', error);
+      dispatch({ type: ACTIONS.LOAD_STATE, payload: { createdAt: new Date().toISOString() } });
     }
   };
 
-  const savePlayerState = async () => {
+  const savePlayerStateToDB = async (db, s) => {
     try {
-      const stateToSave = {
-        playerName: state.playerName,
-        avatar: state.avatar,
-        createdAt: state.createdAt,
-        xp: state.xp,
-        gold: state.gold,
-        totalCommandsExecuted: state.totalCommandsExecuted,
-        uniqueCommandsUsed: state.uniqueCommandsUsed,
-        commandUsageCount: state.commandUsageCount,
-        unlockedAchievements: state.unlockedAchievements,
-        badges: state.badges,
-        soundEnabled: state.soundEnabled,
-        hintsEnabled: state.hintsEnabled,
-        currentStreak: state.currentStreak,
-        lastPlayDate: state.lastPlayDate,
-        totalPlayTime: state.totalPlayTime,
-      };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+      await savePlayerProfile(db, s);
     } catch (error) {
-      console.error('Error saving player state:', error);
+      console.error('Error saving player profile to SQLite:', error);
     }
   };
 
@@ -284,6 +310,10 @@ export function PlayerProvider({ children }) {
     // Extract base command (first word)
     const baseCommand = command.trim().split(/\s+/)[0].toLowerCase();
     dispatch({ type: ACTIONS.RECORD_COMMAND, payload: baseCommand });
+    // Persist to SQLite
+    if (dbRef.current) {
+      recordCommandUsage(dbRef.current, baseCommand).catch(console.error);
+    }
     checkAchievements(baseCommand);
   };
 
@@ -291,6 +321,10 @@ export function PlayerProvider({ children }) {
     const achievement = ACHIEVEMENTS[achievementId];
     if (achievement && !state.unlockedAchievements.includes(achievementId)) {
       dispatch({ type: ACTIONS.UNLOCK_ACHIEVEMENT, payload: achievementId });
+      // Persist to SQLite
+      if (dbRef.current) {
+        insertAchievement(dbRef.current, achievementId).catch(console.error);
+      }
       if (achievement.xpReward) {
         addXP(achievement.xpReward);
       }
@@ -301,6 +335,10 @@ export function PlayerProvider({ children }) {
 
   const addBadge = (badgeId) => {
     dispatch({ type: ACTIONS.ADD_BADGE, payload: badgeId });
+    // Persist to SQLite
+    if (dbRef.current) {
+      insertBadge(dbRef.current, badgeId).catch(console.error);
+    }
   };
 
   const updateSettings = (settings) => {
@@ -316,7 +354,9 @@ export function PlayerProvider({ children }) {
   };
 
   const resetPlayer = async () => {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    if (dbRef.current) {
+      await resetPlayerData(dbRef.current);
+    }
     dispatch({ type: ACTIONS.RESET_PLAYER });
   };
 

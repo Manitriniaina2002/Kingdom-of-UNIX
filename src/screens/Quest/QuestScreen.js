@@ -24,6 +24,7 @@ import Header from '../../components/Common/Header';
 import Terminal from '../../components/Terminal/Terminal';
 import DialogBox from '../../components/Dialog/DialogBox';
 import Button from '../../components/Common/Button';
+import { GameIcon } from '../../utils/icons';
 
 const QuestScreen = ({ route, navigation }) => {
   const { questId } = route.params;
@@ -85,7 +86,7 @@ const QuestScreen = ({ route, navigation }) => {
       });
 
       // Add success feedback
-      addOutput('success', `✅ Objective completed: ${currentObjective.description}`);
+      addOutput('success', `Objective completed: ${currentObjective.description}`);
 
       // Check if quest is complete
       if (currentObjectiveIndex === objectives.length - 1) {
@@ -97,7 +98,7 @@ const QuestScreen = ({ route, navigation }) => {
         
         // Show next objective hint
         setTimeout(() => {
-          addOutput('info', `\n📌 Next: ${objectives[currentObjectiveIndex + 1].description}`);
+          addOutput('info', `\nNext: ${objectives[currentObjectiveIndex + 1].description}`);
         }, 300);
       }
     }
@@ -138,7 +139,7 @@ const QuestScreen = ({ route, navigation }) => {
   // Handle skip intro
   const handleSkipIntro = () => {
     setShowIntroDialog(false);
-    addOutput('info', `📌 Objective: ${currentObjective?.description || 'Start the quest!'}`);
+    addOutput('info', `Objective: ${currentObjective?.description || 'Start the quest!'}`);
   };
 
   if (!quest) {
@@ -171,7 +172,7 @@ const QuestScreen = ({ route, navigation }) => {
             ]
           );
         }}
-        rightIcon={quest.type === 'boss' ? '🐉' : '📜'}
+        rightIcon=""
       />
 
       {/* Progress Section */}
@@ -219,7 +220,7 @@ const QuestScreen = ({ route, navigation }) => {
             <Text style={styles.objectiveLabel}>Current Objective</Text>
             {hintsEnabled && (
               <TouchableOpacity style={styles.hintButton} onPress={handleHintPress}>
-                <Text style={styles.hintButtonText}>💡 Hint</Text>
+                <Text style={styles.hintButtonText}>Hint</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -246,12 +247,11 @@ const QuestScreen = ({ route, navigation }) => {
       {/* Quest Complete Overlay */}
       {questComplete && (
         <View style={styles.completeOverlay}>
-          <Text style={styles.completeIcon}>🎉</Text>
+          <GameIcon name="celebrate" size={48} color={COLORS.gold} />
           <Text style={styles.completeTitle}>Quest Complete!</Text>
           <Button
             title="Claim Rewards"
             onPress={() => setShowCompletionDialog(true)}
-            icon="🏆"
           />
         </View>
       )}
@@ -259,8 +259,8 @@ const QuestScreen = ({ route, navigation }) => {
       {/* Intro Dialog */}
       <DialogBox
         visible={showIntroDialog && !alreadyCompleted}
-        character={zone?.story?.characterEmoji || '🧙'}
-        characterName={zone?.story?.character || 'Guide'}
+        characterImage={require('../../../assets/me.png')}
+        characterName="Manitriniaina"
         message={quest.story.intro}
         onClose={handleSkipIntro}
         onComplete={handleSkipIntro}
@@ -269,11 +269,11 @@ const QuestScreen = ({ route, navigation }) => {
       {/* Completion Dialog */}
       <DialogBox
         visible={showCompletionDialog}
-        character={zone?.story?.characterEmoji || '🧙'}
-        characterName={zone?.story?.character || 'Guide'}
+        characterImage={require('../../../assets/me.png')}
+        characterName="Manitriniaina"
         messages={[
           quest.story.completion,
-          `🏆 Quest Rewards:\n\n⭐ ${quest.xpReward} XP\n💰 ${quest.goldReward} Gold${quest.badge ? `\n🎖️ ${quest.badge.name} Badge` : ''}`,
+          `Quest Rewards:\n\n${quest.xpReward} XP\n${quest.goldReward} Gold${quest.badge ? `\n${quest.badge.name} Badge` : ''}`,
         ]}
         onClose={handleCompleteQuest}
         onComplete={handleCompleteQuest}

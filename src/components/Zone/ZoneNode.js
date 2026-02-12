@@ -11,6 +11,7 @@ import {
   Animated,
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+import { GameIcon } from '../../utils/icons';
 
 const ZoneNode = ({
   zone,
@@ -66,9 +67,7 @@ const ZoneNode = ({
           isSelected && { borderColor: COLORS.gold, borderWidth: 3 },
         ]}
       >
-        <Text style={[styles.icon, { fontSize: iconSize }]}>
-          {isUnlocked ? zone.icon : '🔒'}
-        </Text>
+        {isUnlocked ? <GameIcon name={zone.icon} size={iconSize} color="#fff" /> : <GameIcon name="locked" size={iconSize} color={COLORS.textMuted} />}
       </View>
 
       {/* Progress Ring (if unlocked) */}
@@ -117,7 +116,7 @@ const ZoneNode = ({
       {/* Completion Star */}
       {isUnlocked && progress === 100 && (
         <View style={styles.completionStar}>
-          <Text style={styles.starEmoji}>⭐</Text>
+          <GameIcon name="xp" size={14} color="#fff" />
         </View>
       )}
     </TouchableOpacity>

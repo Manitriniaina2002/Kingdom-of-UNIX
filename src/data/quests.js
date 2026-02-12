@@ -33,13 +33,13 @@ export const QUESTS = {
       },
     ],
     story: {
-      intro: 'Greetings, young adventurer! I am Elder Directory, guardian of this village. Before you can explore our lands, you must learn to see where you are and what surrounds you.',
+      intro: 'Greetings, young adventurer! I am Manitriniaina, guardian of this village. Before you can explore our lands, you must learn to see where you are and what surrounds you.',
       completion: 'Excellent! You\'ve taken your first steps in understanding our world. The ability to see your location and surroundings is the foundation of all UNIX wisdom!',
     },
     badge: {
       id: 'badge_first_steps',
       name: 'First Steps',
-      icon: '👣',
+      icon: 'footsteps',
       description: 'Completed your first quest in the Kingdom!',
     },
   },
@@ -93,7 +93,7 @@ export const QUESTS = {
     badge: {
       id: 'badge_explorer',
       name: 'Village Explorer',
-      icon: '🧭',
+      icon: 'compass',
       description: 'Mastered basic navigation in the Village of Files!',
     },
   },
@@ -147,7 +147,7 @@ export const QUESTS = {
     badge: {
       id: 'badge_scholar',
       name: 'Scholar',
-      icon: '📜',
+      icon: 'readScroll',
       description: 'Learned to read files and explore directory structures!',
     },
   },
@@ -196,12 +196,12 @@ export const QUESTS = {
     ],
     story: {
       intro: 'The Directory Dragon has created chaos in our village! Folders are nested wrongly, and its lair threatens our peace. You must learn to create order... and destroy chaos!',
-      completion: '🏆 VICTORY! The Directory Dragon is vanquished! You\'ve mastered the fundamental arts of the filesystem. The path to the Cave of Permissions now opens before you!',
+      completion: 'VICTORY! The Directory Dragon is vanquished! You\'ve mastered the fundamental arts of the filesystem. The path to the Cave of Permissions now opens before you!',
     },
     badge: {
       id: 'badge_dragon_slayer',
       name: 'Dragon Slayer',
-      icon: '🐉',
+      icon: 'questBoss',
       description: 'Defeated the Directory Dragon and mastered filesystem basics!',
     },
   },
@@ -249,7 +249,7 @@ export const QUESTS = {
     badge: {
       id: 'badge_permission_sight',
       name: 'Permission Sight',
-      icon: '👁️',
+      icon: 'eyePermission',
       description: 'Learned to read and understand UNIX permissions!',
     },
   },
@@ -296,7 +296,7 @@ export const QUESTS = {
     badge: {
       id: 'badge_chmod_master',
       name: 'Chmod Master',
-      icon: '🔐',
+      icon: 'lockPermission',
       description: 'Mastered the chmod command and permission numbers!',
     },
   },
@@ -344,7 +344,7 @@ export const QUESTS = {
     badge: {
       id: 'badge_process_sight',
       name: 'Process Sight',
-      icon: '🌿',
+      icon: 'plantProcess',
       description: 'Learned to view and monitor running processes!',
     },
   },
@@ -391,7 +391,7 @@ export const QUESTS = {
     badge: {
       id: 'badge_process_tamer',
       name: 'Process Tamer',
-      icon: '🦁',
+      icon: 'lionProcess',
       description: 'Mastered process management and the kill command!',
     },
   },

@@ -19,10 +19,12 @@ import { createVirtualFilesystem } from '../../utils/virtualFilesystem';
 import Header from '../../components/Common/Header';
 import Terminal from '../../components/Terminal/Terminal';
 import Card from '../../components/Common/Card';
+import { GameIcon } from '../../utils/icons';
 
 const PracticeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { learnedCommands, recordCommand } = usePlayer();
+  const { uniqueCommandsUsed, recordCommand } = usePlayer();
+  const learnedCommands = uniqueCommandsUsed || [];
   const { resetTerminal, setFilesystem, setCurrentPath } = useTerminal();
   
   const [selectedCommand, setSelectedCommand] = useState(null);
@@ -73,7 +75,7 @@ const PracticeScreen = ({ navigation }) => {
       <Header
         title="Practice Terminal"
         subtitle="Sandbox Mode"
-        rightIcon="🔄"
+        rightIcon=""
         onRightPress={handleResetTerminal}
       />
 
@@ -107,8 +109,8 @@ const PracticeScreen = ({ navigation }) => {
                 <View style={styles.selectedHeader}>
                   <Text style={styles.selectedName}>{selectedCommand.name}</Text>
                   <Text style={styles.selectedDifficulty}>
-                    {selectedCommand.difficulty === 1 ? '⭐' : 
-                     selectedCommand.difficulty === 2 ? '⭐⭐' : '⭐⭐⭐'}
+                    {selectedCommand.difficulty === 1 ? 'Easy' : 
+                     selectedCommand.difficulty === 2 ? 'Medium' : 'Hard'}
                   </Text>
                 </View>
                 <Text style={styles.selectedFun}>{selectedCommand.funExplanation}</Text>
@@ -159,7 +161,7 @@ const PracticeScreen = ({ navigation }) => {
 
             {/* Quick Tips */}
             <Card style={styles.tipsCard}>
-              <Text style={styles.tipsTitle}>💡 Quick Tips</Text>
+              <Text style={styles.tipsTitle}><GameIcon name="tips" size={16} color={COLORS.warning} /> Quick Tips</Text>
               <Text style={styles.tipText}>• Use <Text style={styles.tipCmd}>help</Text> to see available commands</Text>
               <Text style={styles.tipText}>• Use <Text style={styles.tipCmd}>ls -la</Text> for detailed file info</Text>
               <Text style={styles.tipText}>• Use <Text style={styles.tipCmd}>tree</Text> to visualize directory structure</Text>
@@ -168,7 +170,7 @@ const PracticeScreen = ({ navigation }) => {
 
             {/* Stats */}
             <Card style={styles.statsCard}>
-              <Text style={styles.statsTitle}>📊 Your Stats</Text>
+              <Text style={styles.statsTitle}><GameIcon name="progress" size={16} color={COLORS.primary} /> Your Stats</Text>
               <View style={styles.statRow}>
                 <Text style={styles.statLabel}>Commands Learned:</Text>
                 <Text style={styles.statValue}>{learnedCommands.length}/{Object.keys(COMMANDS).length}</Text>

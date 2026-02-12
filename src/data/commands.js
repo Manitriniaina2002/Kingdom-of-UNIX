@@ -13,7 +13,7 @@ export const COMMANDS = {
     category: 'navigation',
     difficulty: 'beginner',
     examples: ['pwd'],
-    funExplanation: '🗺️ Think of it as asking "Where am I?" in the kingdom. pwd tells you the full path from the kingdom\'s root to your current location!',
+    funExplanation: 'Think of it as asking "Where am I?" in the kingdom. pwd tells you the full path from the kingdom\'s root to your current location!',
   },
 
   ls: {
@@ -30,7 +30,7 @@ export const COMMANDS = {
       '-h': 'Human-readable sizes',
     },
     examples: ['ls', 'ls -l', 'ls -la', 'ls documents/'],
-    funExplanation: '👀 Like looking around a room to see what\'s there! ls shows you all the files and folders nearby. Use -l to see more details like a detective!',
+    funExplanation: 'Like looking around a room to see what\'s there! ls shows you all the files and folders nearby. Use -l to see more details like a detective!',
   },
 
   cd: {
@@ -47,7 +47,7 @@ export const COMMANDS = {
       '-': 'Go to previous directory',
     },
     examples: ['cd documents', 'cd ..', 'cd ~', 'cd /home'],
-    funExplanation: '🚶 Like walking through doors! cd lets you move from room to room (directory to directory). Use ".." to go back, like walking out a door you just entered!',
+    funExplanation: 'Like walking through doors! cd lets you move from room to room (directory to directory). Use ".." to go back, like walking out a door you just entered!',
   },
 
   cat: {
@@ -58,7 +58,7 @@ export const COMMANDS = {
     category: 'files',
     difficulty: 'beginner',
     examples: ['cat readme.txt', 'cat notes.txt'],
-    funExplanation: '📖 Like opening a scroll and reading it! cat shows you everything written inside a file. The name comes from "concatenate" - joining things together!',
+    funExplanation: 'Like opening a scroll and reading it! cat shows you everything written inside a file. The name comes from "concatenate" - joining things together!',
   },
 
   tree: {
@@ -69,7 +69,7 @@ export const COMMANDS = {
     category: 'navigation',
     difficulty: 'beginner',
     examples: ['tree', 'tree documents/'],
-    funExplanation: '🌳 Like seeing a family tree, but for folders! tree draws a beautiful picture showing all directories and files nested inside each other.',
+    funExplanation: 'Like seeing a family tree, but for folders! tree draws a beautiful picture showing all directories and files nested inside each other.',
   },
 
   mkdir: {
@@ -83,7 +83,7 @@ export const COMMANDS = {
       '-p': 'Create parent directories as needed',
     },
     examples: ['mkdir projects', 'mkdir -p deep/nested/folder'],
-    funExplanation: '🏗️ Like building a new room! mkdir creates a new folder where you can store files. Use -p to create a whole chain of folders at once!',
+    funExplanation: 'Like building a new room! mkdir creates a new folder where you can store files. Use -p to create a whole chain of folders at once!',
   },
 
   rm: {
@@ -99,8 +99,8 @@ export const COMMANDS = {
       '-i': 'Interactive mode (ask before each removal)',
     },
     examples: ['rm file.txt', 'rm -r folder/', 'rm -rf dangerous_folder/'],
-    funExplanation: '🗑️ Like throwing something in the trash... except there\'s NO UNDO! Be careful with rm, especially rm -rf. Once deleted, files are gone forever!',
-    warning: '⚠️ DANGER: rm permanently deletes files! There is no recycle bin. Triple-check before using rm -rf!',
+    funExplanation: 'Like throwing something in the trash... except there\'s NO UNDO! Be careful with rm, especially rm -rf. Once deleted, files are gone forever!',
+    warning: 'DANGER: rm permanently deletes files! There is no recycle bin. Triple-check before using rm -rf!',
   },
 
   // Permission Commands
@@ -119,7 +119,7 @@ export const COMMANDS = {
       '700': 'rwx------ (private)',
     },
     examples: ['chmod +x script.sh', 'chmod 755 program', 'chmod 644 document.txt'],
-    funExplanation: '🔐 Like setting locks on doors! chmod controls who can read (r), write (w), or execute (x) a file. Numbers like 755 are shorthand codes!',
+    funExplanation: 'Like setting locks on doors! chmod controls who can read (r), write (w), or execute (x) a file. Numbers like 755 are shorthand codes!',
     permissionTable: 'r=4, w=2, x=1. Add them up! 7=rwx, 6=rw, 5=rx, 4=r, 0=none',
   },
 
@@ -131,7 +131,7 @@ export const COMMANDS = {
     category: 'permissions',
     difficulty: 'intermediate',
     examples: ['chown user file.txt', 'chown user:group file.txt'],
-    funExplanation: '👑 Like transferring ownership of a treasure! chown changes who owns a file. Only the root (superuser) can give files to others!',
+    funExplanation: 'Like transferring ownership of a treasure! chown changes who owns a file. Only the root (superuser) can give files to others!',
   },
 
   // Process Commands
@@ -147,7 +147,7 @@ export const COMMANDS = {
       '-ef': 'Full format listing',
     },
     examples: ['ps', 'ps aux', 'ps aux | grep firefox'],
-    funExplanation: '👁️ Like taking a snapshot of all the creatures in the forest! ps shows you every program running right now, with their process IDs (PIDs).',
+    funExplanation: 'Like taking a snapshot of all the creatures in the forest! ps shows you every program running right now, with their process IDs (PIDs).',
   },
 
   top: {
@@ -163,7 +163,7 @@ export const COMMANDS = {
       'h': 'Help',
     },
     examples: ['top'],
-    funExplanation: '📺 Like watching a live security camera! top shows processes in real-time, constantly updating. You can see which programs use the most resources!',
+    funExplanation: 'Like watching a live security camera! top shows processes in real-time, constantly updating. You can see which programs use the most resources!',
   },
 
   kill: {
@@ -179,7 +179,7 @@ export const COMMANDS = {
       '-HUP': 'SIGHUP - Restart/reload process',
     },
     examples: ['kill 1234', 'kill -9 5678'],
-    funExplanation: '🎯 Like asking someone to leave, or kicking them out! kill sends signals to processes. The default is polite, -9 is forceful!',
+    funExplanation: 'Like asking someone to leave, or kicking them out! kill sends signals to processes. The default is polite, -9 is forceful!',
   },
 
   // Pipe and Redirection
@@ -197,7 +197,7 @@ export const COMMANDS = {
       '-v': 'Invert match (show non-matching)',
     },
     examples: ['grep "error" log.txt', 'ps aux | grep firefox', 'grep -i "hello" *.txt'],
-    funExplanation: '🔍 Like a search spell! grep finds all lines containing your search term. Perfect for finding needles in haystacks of text!',
+    funExplanation: 'Like a search spell! grep finds all lines containing your search term. Perfect for finding needles in haystacks of text!',
   },
 
   echo: {
@@ -208,7 +208,7 @@ export const COMMANDS = {
     category: 'basic',
     difficulty: 'beginner',
     examples: ['echo "Hello World"', 'echo $HOME', 'echo "Value: $USER"'],
-    funExplanation: '📢 Like a parrot repeating what you say! echo prints text to the screen. Also useful for showing variable values!',
+    funExplanation: 'Like a parrot repeating what you say! echo prints text to the screen. Also useful for showing variable values!',
   },
 
   whoami: {
@@ -219,7 +219,7 @@ export const COMMANDS = {
     category: 'basic',
     difficulty: 'beginner',
     examples: ['whoami'],
-    funExplanation: '🪪 Like checking your ID card! whoami tells you which user you\'re logged in as. Simple but often needed!',
+    funExplanation: 'Like checking your ID card! whoami tells you which user you\'re logged in as. Simple but often needed!',
   },
 
   clear: {
@@ -230,7 +230,7 @@ export const COMMANDS = {
     category: 'basic',
     difficulty: 'beginner',
     examples: ['clear'],
-    funExplanation: '🧹 Like wiping a whiteboard clean! clear removes all previous output from the terminal. Fresh start!',
+    funExplanation: 'Like wiping a whiteboard clean! clear removes all previous output from the terminal. Fresh start!',
   },
 
   help: {
@@ -241,7 +241,7 @@ export const COMMANDS = {
     category: 'basic',
     difficulty: 'beginner',
     examples: ['help', 'help ls', 'help chmod'],
-    funExplanation: '📚 Your guidebook! help shows you what commands are available and how to use them. Never be afraid to ask for help!',
+    funExplanation: 'Your guidebook! help shows you what commands are available and how to use them. Never be afraid to ask for help!',
   },
 };
 

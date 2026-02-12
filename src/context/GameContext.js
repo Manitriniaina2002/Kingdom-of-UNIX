@@ -1,16 +1,24 @@
 /**
  * Game Context - Global game state management
  * Handles zones, quests, and game progression
+ * Persistence via SQLite (expo-sqlite)
  */
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { ZONES } from '../data/zones';
 import { QUESTS, isQuestUnlocked } from '../data/quests';
+import {
+  openDatabase,
+  loadGameState as dbLoadGameState,
+  saveGameStarted,
+  loadCompletedQuests,
+  insertCompletedQuest,
+  loadUnlockedZones,
+  insertUnlockedZone,
+  resetGameData,
+} from '../database/db';
 
 const GameContext = createContext();
-
-const STORAGE_KEY = '@kingdom_unix_game_state';
 
 // Initial state
 const initialState = {
@@ -94,44 +102,46 @@ function gameReducer(state, action) {
 // Provider component
 export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const dbRef = useRef(null);
 
-  // Load saved state on mount
+  // Open database and load saved state on mount
   useEffect(() => {
-    loadGameState();
-  }, []);
-
-  // Save state whenever it changes
-  useEffect(() => {
-    if (!state.isLoading) {
-      saveGameState();
-    }
-  }, [state.completedQuests, state.unlockedZones, state.gameStarted]);
-
-  const loadGameState = async () => {
-    try {
-      const savedState = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedState) {
-        const parsed = JSON.parse(savedState);
-        dispatch({ type: ACTIONS.LOAD_STATE, payload: parsed });
-      } else {
+    (async () => {
+      try {
+        const db = await openDatabase();
+        dbRef.current = db;
+        await loadStateFromDB(db);
+      } catch (error) {
+        console.error('Error initialising game database:', error);
         dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
       }
-    } catch (error) {
-      console.error('Error loading game state:', error);
-      dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
-    }
-  };
+    })();
+  }, []);
 
-  const saveGameState = async () => {
+  // Persist gameStarted flag whenever it changes
+  useEffect(() => {
+    if (!state.isLoading && dbRef.current) {
+      saveGameStarted(dbRef.current, state.gameStarted).catch(console.error);
+    }
+  }, [state.gameStarted]);
+
+  const loadStateFromDB = async (db) => {
     try {
-      const stateToSave = {
-        completedQuests: state.completedQuests,
-        unlockedZones: state.unlockedZones,
-        gameStarted: state.gameStarted,
-      };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+      const gsRow = await dbLoadGameState(db);
+      const questRows = await loadCompletedQuests(db);
+      const zoneRows = await loadUnlockedZones(db);
+
+      dispatch({
+        type: ACTIONS.LOAD_STATE,
+        payload: {
+          gameStarted: !!gsRow?.game_started,
+          completedQuests: questRows.map(r => r.quest_id),
+          unlockedZones: zoneRows.map(r => r.zone_id),
+        },
+      });
     } catch (error) {
-      console.error('Error saving game state:', error);
+      console.error('Error loading game state from SQLite:', error);
+      dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
     }
   };
 
@@ -146,6 +156,10 @@ export function GameProvider({ children }) {
 
   const completeQuest = (questId) => {
     dispatch({ type: ACTIONS.COMPLETE_QUEST, payload: questId });
+    // Persist to SQLite
+    if (dbRef.current) {
+      insertCompletedQuest(dbRef.current, questId).catch(console.error);
+    }
     
     // Check if this unlocks a new zone
     const quest = QUESTS[questId];
@@ -155,12 +169,18 @@ export function GameProvider({ children }) {
       if (currentIndex < zoneOrder.length - 1) {
         const nextZone = zoneOrder[currentIndex + 1];
         dispatch({ type: ACTIONS.UNLOCK_ZONE, payload: nextZone });
+        if (dbRef.current) {
+          insertUnlockedZone(dbRef.current, nextZone).catch(console.error);
+        }
       }
     }
   };
 
   const unlockZone = (zoneId) => {
     dispatch({ type: ACTIONS.UNLOCK_ZONE, payload: zoneId });
+    if (dbRef.current) {
+      insertUnlockedZone(dbRef.current, zoneId).catch(console.error);
+    }
   };
 
   const startGame = () => {
@@ -168,7 +188,9 @@ export function GameProvider({ children }) {
   };
 
   const resetGame = async () => {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    if (dbRef.current) {
+      await resetGameData(dbRef.current);
+    }
     dispatch({ type: ACTIONS.RESET_GAME });
   };
 
@@ -198,6 +220,7 @@ export function GameProvider({ children }) {
     unlockZone,
     startGame,
     resetGame,
+    resetGameProgress: resetGame,
     isZoneUnlocked,
     isQuestCompleted,
     canStartQuest,

@@ -23,11 +23,12 @@ import PlayerStatsBar from '../../components/Player/PlayerStatsBar';
 import QuestCard from '../../components/Quest/QuestCard';
 import Button from '../../components/Common/Button';
 import DialogBox from '../../components/Dialog/DialogBox';
+import { GameIcon } from '../../utils/icons';
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { gameStarted, startGame, completedQuests, unlockedZones, currentQuest } = useGame();
-  const { level, updateStreak } = usePlayer();
+  const { level, playerName, updateStreak } = usePlayer();
   const [showWelcome, setShowWelcome] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
@@ -99,7 +100,7 @@ const HomeScreen = ({ navigation }) => {
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🏰</Text>
+          <GameIcon name="home" size={28} color={COLORS.primary} />
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Kingdom of UNIX</Text>
             <Text style={styles.subtitle}>Learn by Adventure</Text>
@@ -108,7 +109,7 @@ const HomeScreen = ({ navigation }) => {
             style={styles.settingsButton}
             onPress={() => navigation.getParent()?.navigate('Profile')}
           >
-            <Text style={styles.settingsIcon}>⚙️</Text>
+            <GameIcon name="settings" size={22} color={COLORS.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -124,17 +125,17 @@ const HomeScreen = ({ navigation }) => {
           {/* Welcome Banner */}
           <View style={styles.welcomeBanner}>
             <Image 
-              source={require('../../../assets/Me.png')}
+              source={require('../../../assets/ATRIKA.png')}
               style={styles.welcomePhoto}
             />
             <View style={styles.welcomeContent}>
               <Text style={styles.welcomeTitle}>
-                Welcome back, Adventurer!
+                Welcome back, {playerName}!
               </Text>
               <Text style={styles.welcomeText}>
                 {completedCount === 0 
                   ? 'Your adventure awaits! Start your first quest.'
-                  : `You've completed ${completedCount} quests. Keep going!`}
+                  : `You've completed ${completedCount} quest${completedCount === 1 ? '' : 's'}. Keep going!`}
               </Text>
             </View>
           </View>
@@ -146,12 +147,12 @@ const HomeScreen = ({ navigation }) => {
               onPress={() => navigation.navigate('Zone', { zoneId: currentZone.id })}
             >
               <View style={styles.zoneHeader}>
-                <Text style={styles.zoneIcon}>{currentZone.icon}</Text>
+                <GameIcon name={currentZone.icon} size={28} color={currentZone.color || COLORS.primary} />
                 <View style={styles.zoneInfo}>
                   <Text style={styles.zoneLabel}>Current Zone</Text>
                   <Text style={styles.zoneName}>{currentZone.name}</Text>
                 </View>
-                <Text style={styles.zoneArrow}>→</Text>
+                <GameIcon name="arrow" size={22} color={COLORS.textSecondary} />
               </View>
               <View style={styles.zoneProgress}>
                 <View style={styles.zoneProgressBar}>
@@ -175,7 +176,7 @@ const HomeScreen = ({ navigation }) => {
           {/* Suggested Quest */}
           {suggestedQuest && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>📜 Suggested Quest</Text>
+              <Text style={styles.sectionTitle}><GameIcon name="quest" size={18} color={COLORS.primary} /> Suggested Quest</Text>
               <QuestCard 
                 quest={suggestedQuest}
                 onPress={() => navigation.navigate('Quest', { questId: suggestedQuest.id })}
@@ -185,13 +186,13 @@ const HomeScreen = ({ navigation }) => {
 
           {/* Quick Actions */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>⚡ Quick Actions</Text>
+            <Text style={styles.sectionTitle}><GameIcon name="quickAction" size={18} color={COLORS.primary} /> Quick Actions</Text>
             <View style={styles.actionsGrid}>
               <TouchableOpacity 
                 style={styles.actionCard}
                 onPress={() => navigation.getParent()?.navigate('Map')}
               >
-                <Text style={styles.actionIcon}>🗺️</Text>
+                <GameIcon name="map" size={28} color={COLORS.primary} />
                 <Text style={styles.actionTitle}>World Map</Text>
                 <Text style={styles.actionDesc}>Explore zones</Text>
               </TouchableOpacity>
@@ -200,7 +201,7 @@ const HomeScreen = ({ navigation }) => {
                 style={styles.actionCard}
                 onPress={() => navigation.getParent()?.navigate('Practice')}
               >
-                <Text style={styles.actionIcon}>💻</Text>
+                <GameIcon name="terminal" size={28} color={COLORS.primary} />
                 <Text style={styles.actionTitle}>Practice</Text>
                 <Text style={styles.actionDesc}>Free terminal</Text>
               </TouchableOpacity>
@@ -209,7 +210,7 @@ const HomeScreen = ({ navigation }) => {
                 style={styles.actionCard}
                 onPress={() => navigation.getParent()?.navigate('Profile')}
               >
-                <Text style={styles.actionIcon}>📖</Text>
+                <GameIcon name="guide" size={28} color={COLORS.primary} />
                 <Text style={styles.actionTitle}>Commands</Text>
                 <Text style={styles.actionDesc}>Learn more</Text>
               </TouchableOpacity>
@@ -218,7 +219,7 @@ const HomeScreen = ({ navigation }) => {
                 style={styles.actionCard}
                 onPress={() => navigation.getParent()?.navigate('Profile')}
               >
-                <Text style={styles.actionIcon}>🏆</Text>
+                <GameIcon name="achievement" size={28} color={COLORS.primary} />
                 <Text style={styles.actionTitle}>Achievements</Text>
                 <Text style={styles.actionDesc}>{completedCount} earned</Text>
               </TouchableOpacity>
@@ -227,7 +228,7 @@ const HomeScreen = ({ navigation }) => {
 
           {/* Overall Progress */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📊 Overall Progress</Text>
+            <Text style={styles.sectionTitle}><GameIcon name="progress" size={18} color={COLORS.primary} /> Overall Progress</Text>
             <View style={styles.progressCard}>
               <View style={styles.progressRow}>
                 <Text style={styles.progressLabel}>Quests Completed</Text>
@@ -250,14 +251,14 @@ const HomeScreen = ({ navigation }) => {
       {/* Welcome Dialog */}
       <DialogBox
         visible={showWelcome}
-        character="🧙‍♂️"
-        characterName="Elder Directory"
+        characterImage={require('../../../assets/me.png')}
+        characterName="Manitriniaina"
         messages={[
-          "Greetings, young traveler! Welcome to the Kingdom of UNIX! 🏰",
-          "I am Elder Directory, your guide on this magical journey into the world of computers.",
+          "Greetings, young traveler! Welcome to the Kingdom of UNIX!",
+          "I am Manitriniaina, your guide on this magical journey into the world of computers.",
           "Here, you'll learn the ancient art of the Command Line through quests and adventures!",
           "Don't worry if you've never used a computer terminal before - we start from the very beginning!",
-          "Are you ready to begin your adventure? The Village of Files awaits! 🌟",
+          "Are you ready to begin your adventure? The Village of Files awaits!",
         ]}
         onClose={() => setShowWelcome(false)}
         onComplete={handleStartGame}

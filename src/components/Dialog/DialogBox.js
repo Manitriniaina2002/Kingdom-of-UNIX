@@ -10,13 +10,15 @@ import {
   TouchableOpacity,
   Modal,
   Animated,
+  Image,
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 
 const DialogBox = ({
   visible = false,
-  character = '🧙',
-  characterName = 'Elder Directory',
+  character = '',
+  characterImage = null,
+  characterName = 'Manitriniaina',
   message = '',
   messages = [], // Array of messages for multi-step dialog
   onClose,
@@ -129,7 +131,11 @@ const DialogBox = ({
           {/* Character Avatar */}
           <View style={styles.characterContainer}>
             <View style={styles.characterAvatar}>
-              <Text style={styles.characterEmoji}>{character}</Text>
+              {characterImage ? (
+                <Image source={characterImage} style={styles.characterImageStyle} />
+              ) : (
+                <Text style={styles.characterEmoji}>{character}</Text>
+              )}
             </View>
             <View style={styles.characterNameBadge}>
               <Text style={styles.characterName}>{characterName}</Text>
@@ -176,7 +182,7 @@ const DialogBox = ({
                 onPress={handleContinue}
               >
                 <Text style={styles.continueButtonText}>
-                  {isTyping ? 'Skip ⏭️' : (isLastMessage ? '✨ Got it!' : `${continueText} →`)}
+                  {isTyping ? 'Skip' : (isLastMessage ? 'Got it!' : `${continueText}`)}
                 </Text>
               </TouchableOpacity>
             )}
@@ -220,6 +226,11 @@ const styles = StyleSheet.create({
   },
   characterEmoji: {
     fontSize: 40,
+  },
+  characterImageStyle: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
   },
   characterNameBadge: {
     backgroundColor: COLORS.primary,

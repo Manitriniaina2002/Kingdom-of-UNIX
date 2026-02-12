@@ -9,6 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { GameIcon } from '../utils/icons';
 
 // Screens
 import HomeScreen from '../screens/Home/HomeScreen';
@@ -22,12 +23,15 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // Custom Tab Bar Icon component
-const TabIcon = ({ icon, label, focused }) => (
+const TabIcon = ({ iconName, label, focused }) => (
   <View style={[styles.tabIcon, focused && styles.tabIconFocused]}>
-    <Text style={styles.tabEmoji}>{icon}</Text>
+    <GameIcon name={iconName} size={22} color={focused ? COLORS.primary : COLORS.textSecondary} />
     <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
   </View>
 );
+
+// Suppress tab label entirely on all platforms
+const noLabel = () => null;
 
 // Home Stack Navigator
 const HomeStack = () => (
@@ -87,6 +91,7 @@ const MainTabs = () => {
           ...SHADOWS.medium,
         },
         tabBarShowLabel: false,
+        tabBarLabel: () => null,
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textSecondary,
       }}
@@ -95,8 +100,9 @@ const MainTabs = () => {
         name="Home"
         component={HomeStack}
         options={{
+          tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="🏰" label="Home" focused={focused} />
+            <TabIcon iconName="home" label="Home" focused={focused} />
           ),
         }}
       />
@@ -104,8 +110,9 @@ const MainTabs = () => {
         name="Map"
         component={MapStack}
         options={{
+          tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="🗺️" label="Map" focused={focused} />
+            <TabIcon iconName="map" label="Map" focused={focused} />
           ),
         }}
       />
@@ -113,8 +120,9 @@ const MainTabs = () => {
         name="Practice"
         component={PracticeScreen}
         options={{
+          tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="⌨️" label="Practice" focused={focused} />
+            <TabIcon iconName="practice" label="Practice" focused={focused} />
           ),
         }}
       />
@@ -122,8 +130,9 @@ const MainTabs = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
+          tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="👤" label="Profile" focused={focused} />
+            <TabIcon iconName="profile" label="Profile" focused={focused} />
           ),
         }}
       />
@@ -151,14 +160,11 @@ const styles = StyleSheet.create({
   tabIconFocused: {
     backgroundColor: COLORS.primary + '20',
   },
-  tabEmoji: {
-    fontSize: 20,
-    marginBottom: 2,
-  },
   tabLabel: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.xs,
     fontWeight: FONTS.weights.medium,
+    marginTop: 2,
   },
   tabLabelFocused: {
     color: COLORS.primary,

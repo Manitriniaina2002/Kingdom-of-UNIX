@@ -17,6 +17,7 @@ import { useGame } from '../../context/GameContext';
 import { ZONES, ZONE_ORDER, WORLD_CONNECTIONS } from '../../data/zones';
 import Header from '../../components/Common/Header';
 import ZoneNode from '../../components/Zone/ZoneNode';
+import { GameIcon } from '../../utils/icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -45,7 +46,7 @@ const WorldMapScreen = ({ navigation }) => {
         subtitle="Kingdom of UNIX"
         showBack
         onLeftPress={() => navigation.goBack()}
-        rightIcon="📊"
+        rightIcon=""
         onRightPress={() => navigation.navigate('Progress')}
       />
 
@@ -60,7 +61,7 @@ const WorldMapScreen = ({ navigation }) => {
           <Text style={styles.legendText}>Locked</Text>
         </View>
         <View style={styles.legendItem}>
-          <Text style={styles.legendEmoji}>⭐</Text>
+          <GameIcon name="xp" size={12} color={COLORS.gold} />
           <Text style={styles.legendText}>Complete</Text>
         </View>
       </View>
@@ -140,7 +141,7 @@ const WorldMapScreen = ({ navigation }) => {
 
         {/* Kingdom Info Card */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>🏰 Kingdom Progress</Text>
+          <Text style={styles.infoTitle}><GameIcon name="home" size={18} color={COLORS.textPrimary} /> Kingdom Progress</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Zones Explored:</Text>
             <Text style={styles.infoValue}>{unlockedZones.length}/{ZONE_ORDER.length}</Text>
@@ -170,7 +171,7 @@ const WorldMapScreen = ({ navigation }) => {
                 disabled={!isUnlocked}
               >
                 <View style={[styles.zoneListIcon, { backgroundColor: isUnlocked ? zone.color + '30' : COLORS.surfaceLight }]}>
-                  <Text style={styles.zoneListEmoji}>{isUnlocked ? zone.icon : '🔒'}</Text>
+                  {isUnlocked ? <GameIcon name={zone.icon} size={24} color={zone.color} /> : <GameIcon name="locked" size={24} color={COLORS.textMuted} />}
                 </View>
                 <View style={styles.zoneListContent}>
                   <Text style={[styles.zoneListName, !isUnlocked && styles.lockedText]}>
@@ -186,7 +187,7 @@ const WorldMapScreen = ({ navigation }) => {
                   )}
                 </View>
                 <View style={styles.zoneListBadge}>
-                  {isUnlocked && progress === 100 && <Text style={styles.completeBadge}>⭐</Text>}
+                  {isUnlocked && progress === 100 && <GameIcon name="xp" size={20} color={COLORS.gold} />}
                   {isUnlocked && progress < 100 && <Text style={styles.progressBadge}>{progress}%</Text>}
                 </View>
               </TouchableOpacity>

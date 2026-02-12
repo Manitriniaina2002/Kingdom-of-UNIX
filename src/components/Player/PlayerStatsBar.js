@@ -8,9 +8,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { usePlayer } from '../../context/PlayerContext';
+import { GameIcon } from '../../utils/icons';
 
 const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
   const { 
@@ -28,14 +30,14 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
     return (
       <TouchableOpacity style={styles.compactContainer} onPress={onProfilePress}>
         <View style={styles.compactAvatar}>
-          <Text style={styles.compactAvatarText}>{avatar}</Text>
+          <Image source={require('../../../assets/ATRIKA.png')} style={styles.compactAvatarImage} />
         </View>
         <View style={styles.compactLevel}>
           <Text style={styles.compactLevelText}>{level.level}</Text>
         </View>
         <View style={styles.compactStats}>
-          <Text style={styles.compactXP}>⭐ {xp}</Text>
-          <Text style={styles.compactGold}>💰 {gold}</Text>
+          <Text style={styles.compactXP}><GameIcon name="xp" size={12} color={COLORS.xpBar} /> {xp}</Text>
+          <Text style={styles.compactGold}><GameIcon name="gold" size={12} color={COLORS.gold} /> {gold}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -46,7 +48,7 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
       {/* Avatar and Level */}
       <TouchableOpacity style={styles.profileSection} onPress={onProfilePress}>
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatar}>{avatar}</Text>
+          <Image source={require('../../../assets/ATRIKA.png')} style={styles.avatarImage} />
           <View style={styles.levelBadge}>
             <Text style={styles.levelText}>{level.level}</Text>
           </View>
@@ -72,12 +74,12 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
       {/* Gold and Streak */}
       <View style={styles.statsSection}>
         <View style={styles.statItem}>
-          <Text style={styles.statIcon}>💰</Text>
+          <GameIcon name="gold" size={18} color={COLORS.gold} />
           <Text style={styles.statValue}>{gold}</Text>
         </View>
         {currentStreak > 0 && (
           <View style={styles.statItem}>
-            <Text style={styles.statIcon}>🔥</Text>
+            <GameIcon name="streak" size={18} color={COLORS.error} />
             <Text style={styles.statValue}>{currentStreak}</Text>
           </View>
         )}
@@ -113,6 +115,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceLight,
     borderRadius: 25,
     overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: COLORS.surfaceLight,
   },
   levelBadge: {
     position: 'absolute',
@@ -220,6 +228,11 @@ const styles = StyleSheet.create({
   },
   compactAvatarText: {
     fontSize: 16,
+  },
+  compactAvatarImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
   compactLevel: {
     backgroundColor: COLORS.gold,

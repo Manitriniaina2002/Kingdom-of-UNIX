@@ -121,7 +121,7 @@ const Terminal = ({
           <View style={[styles.dot, styles.dotGreen]} />
         </View>
         <Text style={styles.headerTitle}>
-          {questMode ? '📜 Quest Terminal' : '🖥️ Kingdom Terminal'}
+          {questMode ? 'Quest Terminal' : 'Kingdom Terminal'}
         </Text>
         <View style={styles.headerDots} />
       </View>

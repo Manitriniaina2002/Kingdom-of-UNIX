@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+import { GameIcon } from '../../utils/icons';
 
 const Badge = ({
   badge,
@@ -47,9 +48,7 @@ const Badge = ({
           !isUnlocked && styles.lockedBadge,
         ]}
       >
-        <Text style={[styles.badgeIcon, { fontSize: iconSize }]}>
-          {isUnlocked ? badge.icon : '❓'}
-        </Text>
+        {isUnlocked ? <GameIcon name={badge.icon} size={iconSize} color="#fff" /> : <GameIcon name="quest" size={iconSize} color={COLORS.textMuted} />}
         
         {/* Shine effect for unlocked badges */}
         {isUnlocked && (
@@ -106,9 +105,7 @@ export const AchievementCard = ({
       activeOpacity={onPress ? 0.7 : 1}
     >
       <View style={styles.achievementIcon}>
-        <Text style={styles.achievementEmoji}>
-          {isUnlocked ? achievement.icon : '🔒'}
-        </Text>
+        {isUnlocked ? <GameIcon name={achievement.icon} size={24} color={COLORS.gold} /> : <GameIcon name="locked" size={24} color={COLORS.textMuted} />}
       </View>
 
       <View style={styles.achievementContent}>
