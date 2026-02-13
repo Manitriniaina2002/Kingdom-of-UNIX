@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Kingdom of UNIX",
+    "name": "Kingdom-of-UNIX",
     "slug": "kingdom-of-unix",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,9 +28,6 @@
     },
     "web": {},
     "scheme": "kingdomofunix",
-    "plugins": [
-      "expo-sqlite"
-    ],
     "extra": {
       "eas": {
         "projectId": "kingdom-of-unix"
