@@ -13,6 +13,7 @@ import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import { GameIcon } from '../../utils/icons';
+import { useLanguage } from '../../i18n';
 
 const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
   const { 
@@ -26,6 +27,7 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
     currentStreak,
   } = usePlayer();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const displayAvatar = avatar || currentUser?.avatar || '🧙';
   const displayName = currentUser?.displayName || playerName;
 
@@ -71,7 +73,7 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
         <View style={styles.xpBarContainer}>
           <View style={[styles.xpBar, { width: `${levelProgress}%` }]} />
         </View>
-        <Text style={styles.xpToNext}>{xpToNextLevel} XP to next level</Text>
+        <Text style={styles.xpToNext}>{t('playerStats.xpToNextLevel', { xp: xpToNextLevel })}</Text>
       </View>
 
       {/* Gold and Streak */}

@@ -13,6 +13,7 @@ import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/the
 import { GameIcon } from '../utils/icons';
 import { useAuth } from '../context/AuthContext';
 import { useResponsive } from '../utils/responsive';
+import { useLanguage } from '../i18n';
 
 // Screens
 import HomeScreen from '../screens/Home/HomeScreen';
@@ -111,6 +112,7 @@ const LessonsStack = () => (
 const MainTabs = () => {
   const insets = useSafeAreaInsets();
   const { layout } = useResponsive();
+  const { t } = useLanguage();
 
   return (
     <Tab.Navigator
@@ -137,7 +139,7 @@ const MainTabs = () => {
         options={{
           tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon iconName="home" label="Home" focused={focused} />
+            <TabIcon iconName="home" label={t('nav.home')} focused={focused} />
           ),
         }}
       />
@@ -147,7 +149,7 @@ const MainTabs = () => {
         options={{
           tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon iconName="map" label="Map" focused={focused} />
+            <TabIcon iconName="map" label={t('nav.map')} focused={focused} />
           ),
         }}
       />
@@ -157,7 +159,7 @@ const MainTabs = () => {
         options={{
           tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon iconName="book" label="Lessons" focused={focused} />
+            <TabIcon iconName="book" label={t('nav.lessons')} focused={focused} />
           ),
         }}
       />
@@ -167,7 +169,7 @@ const MainTabs = () => {
         options={{
           tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon iconName="practice" label="Practice" focused={focused} />
+            <TabIcon iconName="practice" label={t('nav.practice')} focused={focused} />
           ),
         }}
       />
@@ -177,7 +179,7 @@ const MainTabs = () => {
         options={{
           tabBarLabel: noLabel,
           tabBarIcon: ({ focused }) => (
-            <TabIcon iconName="profile" label="Profile" focused={focused} />
+            <TabIcon iconName="profile" label={t('nav.profile')} focused={focused} />
           ),
         }}
       />
@@ -188,12 +190,13 @@ const MainTabs = () => {
 // Root Navigator - shows auth or main based on authentication state
 const AppNavigator = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingLogo}>⚔️</Text>
-        <Text style={styles.loadingTitle}>Kingdom of UNIX</Text>
+        <Text style={styles.loadingTitle}>{t('common.appTitle')}</Text>
       </View>
     );
   }

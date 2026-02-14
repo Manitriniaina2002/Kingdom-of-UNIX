@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useLesson } from '../../context/LessonContext';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 import { downloadAllLessons } from '../../utils/lessonExporter';
 
 // Lazy import lessons data to avoid circular dependency issues
@@ -31,6 +32,7 @@ function getLessonsData() {
 export default function LessonsScreen({ navigation }) {
   const { completedLessons } = useLesson();
   const { layout, fonts, spacing, isTablet, isDesktop, width } = useResponsive();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -93,23 +95,23 @@ export default function LessonsScreen({ navigation }) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, { fontSize: fonts.xxl }]}>UNIX Lessons</Text>
+          <Text style={[styles.title, { fontSize: fonts.xxl }]}>{t('lessons.unixLessons')}</Text>
           <Text style={[styles.subtitle, { fontSize: fonts.sm }]}>
-            {allLessons.length} lessons across {CHAPTERS.length} chapters
+            {t('lessons.lessonsAcrossChapters', { lessons: allLessons.length, chapters: CHAPTERS.length })}
           </Text>
         </View>
 
         {/* Overall Progress */}
         <View style={[styles.progressCard, { marginBottom: spacing.lg }]}>
           <View style={styles.progressHeader}>
-            <Text style={[styles.progressLabel, { fontSize: fonts.md }]}>Overall Progress</Text>
+            <Text style={[styles.progressLabel, { fontSize: fonts.md }]}>{t('lessons.overallProgress')}</Text>
             <Text style={[styles.progressPercent, { fontSize: fonts.lg }]}>{totalProgress}%</Text>
           </View>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${totalProgress}%` }]} />
           </View>
           <Text style={[styles.progressMeta, { fontSize: fonts.xs }]}>
-            {completedLessons.length} / {allLessons.length} lessons completed
+            {t('lessons.lessonsCompleted', { done: completedLessons.length, total: allLessons.length })}
           </Text>
         </View>
 
@@ -117,7 +119,7 @@ export default function LessonsScreen({ navigation }) {
         <View style={[styles.actionRow, { marginBottom: spacing.lg }]}>
           <TextInput
             style={[styles.searchInput, { fontSize: fonts.md, flex: 1 }]}
-            placeholder="Search lessons or commands..."
+            placeholder={t('lessons.searchPlaceholder')}
             placeholderTextColor={COLORS.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -131,7 +133,7 @@ export default function LessonsScreen({ navigation }) {
               <ActivityIndicator size="small" color={COLORS.background} />
             ) : (
               <Text style={[styles.downloadButtonText, { fontSize: fonts.sm }]}>
-                PDF
+                {t('lessons.pdf')}
               </Text>
             )}
           </TouchableOpacity>
@@ -164,7 +166,7 @@ export default function LessonsScreen({ navigation }) {
                   <Text style={styles.chapterIcon}>{chapter.icon}</Text>
                   <View style={styles.chapterBadge}>
                     <Text style={[styles.chapterBadgeText, { fontSize: fonts.xs }]}>
-                      {chapterLessons.length} lessons
+                      {t('lessons.lessonsCount', { count: chapterLessons.length })}
                     </Text>
                   </View>
                 </View>

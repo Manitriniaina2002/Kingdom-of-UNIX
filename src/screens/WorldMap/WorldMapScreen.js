@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useGame } from '../../context/GameContext';
 import { ZONES, ZONE_ORDER, WORLD_CONNECTIONS } from '../../data/zones';
@@ -24,6 +25,7 @@ const WorldMapScreen = ({ navigation }) => {
   const { unlockedZones, getZoneProgress, completedQuests } = useGame();
   const [selectedZone, setSelectedZone] = useState(null);
   const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
+  const { t } = useLanguage();
 
   const handleZonePress = (zoneId) => {
     if (unlockedZones.includes(zoneId)) {
@@ -41,8 +43,8 @@ const WorldMapScreen = ({ navigation }) => {
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <Header
-        title="World Map"
-        subtitle="Kingdom of UNIX"
+        title={t('map.worldMap')}
+        subtitle={t('common.appTitle')}
         showBack
         onLeftPress={() => navigation.goBack()}
         rightIcon=""
@@ -53,15 +55,15 @@ const WorldMapScreen = ({ navigation }) => {
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: COLORS.success }]} />
-          <Text style={styles.legendText}>Unlocked</Text>
+          <Text style={styles.legendText}>{t('map.unlocked')}</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: COLORS.textMuted }]} />
-          <Text style={styles.legendText}>Locked</Text>
+          <Text style={styles.legendText}>{t('map.locked')}</Text>
         </View>
         <View style={styles.legendItem}>
           <GameIcon name="xp" size={12} color={COLORS.gold} />
-          <Text style={styles.legendText}>Complete</Text>
+          <Text style={styles.legendText}>{t('map.complete')}</Text>
         </View>
       </View>
 
@@ -140,20 +142,20 @@ const WorldMapScreen = ({ navigation }) => {
 
         {/* Kingdom Info Card */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}><GameIcon name="home" size={18} color={COLORS.textPrimary} /> Kingdom Progress</Text>
+          <Text style={styles.infoTitle}><GameIcon name="home" size={18} color={COLORS.textPrimary} /> {t('map.kingdomProgress')}</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Zones Explored:</Text>
+            <Text style={styles.infoLabel}>{t('map.zonesExplored')}</Text>
             <Text style={styles.infoValue}>{unlockedZones.length}/{ZONE_ORDER.length}</Text>
           </View>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${totalProgress}%` }]} />
           </View>
-          <Text style={styles.progressText}>{totalProgress}% Complete</Text>
+          <Text style={styles.progressText}>{t('map.percentComplete', { pct: totalProgress })}</Text>
         </View>
 
         {/* Zone List (Alternative View) */}
         <View style={styles.zoneList}>
-          <Text style={styles.listTitle}>All Zones</Text>
+          <Text style={styles.listTitle}>{t('map.allZones')}</Text>
           {ZONE_ORDER.map((zoneId) => {
             const zone = ZONES[zoneId];
             const isUnlocked = unlockedZones.includes(zoneId);
@@ -178,7 +180,7 @@ const WorldMapScreen = ({ navigation }) => {
                     {zone.name}
                   </Text>
                   <Text style={[styles.zoneListDesc, !isUnlocked && styles.lockedText]} numberOfLines={1}>
-                    {isUnlocked ? zone.description : `Requires Level ${zone.requiredLevel}`}
+                    {isUnlocked ? zone.description : t('map.requiresLevel', { level: zone.requiredLevel })}
                   </Text>
                   {isUnlocked && (
                     <View style={styles.miniProgress}>

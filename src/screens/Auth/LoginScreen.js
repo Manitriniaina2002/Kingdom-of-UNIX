@@ -20,12 +20,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 
 const AVATARS = ['🧙', '🧝', '🧛', '🧚', '🦊', '🐉', '🦅', '🐺', '🌟', '⚔️', '🛡️', '🗡️'];
 
 export default function LoginScreen({ navigation }) {
   const { login, loginAsGuest, switchUser, users, isLoading } = useAuth();
   const { layout, fonts, spacing, isTablet, isDesktop, width } = useResponsive();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const [username, setUsername] = useState('');
@@ -35,11 +37,11 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!username.trim()) {
-      setError('Please enter your username');
+      setError(t('auth.pleaseEnterUsername'));
       return;
     }
     if (!password.trim()) {
-      setError('Please enter your password');
+      setError(t('auth.pleaseEnterPassword'));
       return;
     }
     setError('');
@@ -47,7 +49,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(username.trim(), password);
     } catch (e) {
-      setError(e.message || 'Login failed');
+      setError(e.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await loginAsGuest();
     } catch (e) {
-      setError(e.message || 'Guest login failed');
+      setError(e.message || t('auth.guestLoginFailed'));
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await switchUser(userId);
     } catch (e) {
-      setError(e.message || 'Switch failed');
+      setError(e.message || t('auth.switchFailed'));
     } finally {
       setLoading(false);
     }
@@ -104,15 +106,15 @@ export default function LoginScreen({ navigation }) {
         {/* Header */}
         <View style={styles.headerSection}>
           <Text style={[styles.logo, { fontSize: fonts.title }]}>⚔️</Text>
-          <Text style={[styles.title, { fontSize: fonts.xxxl }]}>Kingdom of UNIX</Text>
+          <Text style={[styles.title, { fontSize: fonts.xxxl }]}>{t('common.appTitle')}</Text>
           <Text style={[styles.subtitle, { fontSize: fonts.md }]}>
-            Master the terminal through adventure
+            {t('auth.masterTerminal')}
           </Text>
         </View>
 
         {/* Login Card */}
         <View style={[styles.card, { maxWidth: cardMaxWidth, alignSelf: 'center', width: '100%' }]}>
-          <Text style={[styles.cardTitle, { fontSize: fonts.xl }]}>Sign In</Text>
+          <Text style={[styles.cardTitle, { fontSize: fonts.xl }]}>{t('auth.signIn')}</Text>
 
           {error ? (
             <View style={styles.errorBox}>
@@ -121,10 +123,10 @@ export default function LoginScreen({ navigation }) {
           ) : null}
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontSize: fonts.sm }]}>Username</Text>
+            <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.username')}</Text>
             <TextInput
               style={[styles.input, { fontSize: fonts.md }]}
-              placeholder="Enter username"
+              placeholder={t('auth.enterUsername')}
               placeholderTextColor={COLORS.textMuted}
               value={username}
               onChangeText={setUsername}
@@ -135,10 +137,10 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontSize: fonts.sm }]}>Password</Text>
+            <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.password')}</Text>
             <TextInput
               style={[styles.input, { fontSize: fonts.md }]}
-              placeholder="Enter password"
+              placeholder={t('auth.enterPassword')}
               placeholderTextColor={COLORS.textMuted}
               value={password}
               onChangeText={setPassword}
@@ -156,7 +158,7 @@ export default function LoginScreen({ navigation }) {
             {loading ? (
               <ActivityIndicator color={COLORS.background} size="small" />
             ) : (
-              <Text style={[styles.primaryButtonText, { fontSize: fonts.lg }]}>Login</Text>
+              <Text style={[styles.primaryButtonText, { fontSize: fonts.lg }]}>{t('auth.login')}</Text>
             )}
           </TouchableOpacity>
 
@@ -166,13 +168,13 @@ export default function LoginScreen({ navigation }) {
             disabled={loading}
           >
             <Text style={[styles.secondaryButtonText, { fontSize: fonts.md }]}>
-              Create Account
+              {t('auth.createAccount')}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={[styles.dividerText, { fontSize: fonts.sm }]}>or</Text>
+            <Text style={[styles.dividerText, { fontSize: fonts.sm }]}>{t('common.or')}</Text>
             <View style={styles.dividerLine} />
           </View>
 
@@ -182,7 +184,7 @@ export default function LoginScreen({ navigation }) {
             disabled={loading}
           >
             <Text style={[styles.guestButtonText, { fontSize: fonts.md }]}>
-              Continue as Guest
+              {t('auth.continueAsGuest')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -190,9 +192,9 @@ export default function LoginScreen({ navigation }) {
         {/* Quick User Switch */}
         {users.length > 0 && (
           <View style={[styles.card, { maxWidth: cardMaxWidth, alignSelf: 'center', width: '100%', marginTop: spacing.lg }]}>
-            <Text style={[styles.cardTitle, { fontSize: fonts.lg }]}>Quick Switch</Text>
+            <Text style={[styles.cardTitle, { fontSize: fonts.lg }]}>{t('auth.quickSwitch')}</Text>
             <Text style={[styles.quickSwitchHint, { fontSize: fonts.sm }]}>
-              Tap a user to log in directly
+              {t('auth.tapToLogin')}
             </Text>
             <View style={styles.userList}>
               {users.filter(u => !u.isGuest).map((user) => (

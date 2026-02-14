@@ -26,6 +26,7 @@ import DialogBox from '../../components/Dialog/DialogBox';
 import Button from '../../components/Common/Button';
 import { GameIcon } from '../../utils/icons';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 
 const QuestScreen = ({ route, navigation }) => {
   const { questId } = route.params;
@@ -51,6 +52,7 @@ const QuestScreen = ({ route, navigation }) => {
   const [showHint, setShowHint] = useState(false);
   const [questComplete, setQuestComplete] = useState(false);
   const { layout, fonts, spacing } = useResponsive();
+  const { t } = useLanguage();
 
   // Initialize quest
   useEffect(() => {
@@ -88,7 +90,7 @@ const QuestScreen = ({ route, navigation }) => {
       });
 
       // Add success feedback
-      addOutput('success', `Objective completed: ${currentObjective.description}`);
+      addOutput('success', t('quest.objectiveCompleted', { desc: currentObjective.description }));
 
       // Check if quest is complete
       if (currentObjectiveIndex === objectives.length - 1) {
@@ -100,7 +102,7 @@ const QuestScreen = ({ route, navigation }) => {
         
         // Show next objective hint
         setTimeout(() => {
-          addOutput('info', `\nNext: ${objectives[currentObjectiveIndex + 1].description}`);
+          addOutput('info', `\n${t('quest.nextObjective', { desc: objectives[currentObjectiveIndex + 1].description })}`);
         }, 300);
       }
     }
@@ -141,13 +143,13 @@ const QuestScreen = ({ route, navigation }) => {
   // Handle skip intro
   const handleSkipIntro = () => {
     setShowIntroDialog(false);
-    addOutput('info', `Objective: ${currentObjective?.description || 'Start the quest!'}`);
+    addOutput('info', `${t('quest.currentObjective')}: ${currentObjective?.description || t('quest.startQuest')}`);
   };
 
   if (!quest) {
     return (
       <View style={styles.container}>
-        <Header title="Loading..." showBack onLeftPress={() => navigation.goBack()} />
+        <Header title={t('common.loading')} showBack onLeftPress={() => navigation.goBack()} />
       </View>
     );
   }
@@ -163,11 +165,11 @@ const QuestScreen = ({ route, navigation }) => {
         showBack
         onLeftPress={() => {
           Alert.alert(
-            'Leave Quest?',
-            'Your progress in this quest will be lost.',
+            t('quest.leaveQuest'),
+            t('quest.leaveQuestMsg'),
             [
-              { text: 'Stay', style: 'cancel' },
-              { text: 'Leave', style: 'destructive', onPress: () => {
+              { text: t('quest.stay'), style: 'cancel' },
+              { text: t('quest.leave'), style: 'destructive', onPress: () => {
                 resetTerminal();
                 navigation.goBack();
               }},
@@ -180,7 +182,7 @@ const QuestScreen = ({ route, navigation }) => {
       {/* Progress Section */}
       <View style={styles.progressSection}>
         <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>Progress</Text>
+          <Text style={styles.progressTitle}>{t('quest.progress')}</Text>
           <Text style={styles.progressCount}>
             {objectives.filter(o => o.completed).length}/{objectives.length}
           </Text>
@@ -219,10 +221,10 @@ const QuestScreen = ({ route, navigation }) => {
       {currentObjective && !questComplete && (
         <View style={styles.currentObjectiveCard}>
           <View style={styles.objectiveHeader}>
-            <Text style={styles.objectiveLabel}>Current Objective</Text>
+            <Text style={styles.objectiveLabel}>{t('quest.currentObjective')}</Text>
             {hintsEnabled && (
               <TouchableOpacity style={styles.hintButton} onPress={handleHintPress}>
-                <Text style={styles.hintButtonText}>Hint</Text>
+                <Text style={styles.hintButtonText}>{t('quest.hint')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -230,7 +232,7 @@ const QuestScreen = ({ route, navigation }) => {
             {currentObjective.description}
           </Text>
           <View style={styles.expectedCommand}>
-            <Text style={styles.expectedLabel}>Expected:</Text>
+            <Text style={styles.expectedLabel}>{t('quest.expected')}</Text>
             <Text style={styles.expectedText}>{currentObjective.command}</Text>
           </View>
         </View>
@@ -242,7 +244,7 @@ const QuestScreen = ({ route, navigation }) => {
           onCommandExecuted={handleCommandExecuted}
           height={layout.terminalHeight}
           questMode={true}
-          placeholder={currentObjective ? `Type: ${currentObjective.command.split(' ')[0]}...` : 'Type a command...'}
+          placeholder={currentObjective ? t('quest.typeCommand', { cmd: currentObjective.command.split(' ')[0] }) : t('quest.typeACommand')}
         />
       </View>
 
@@ -250,9 +252,9 @@ const QuestScreen = ({ route, navigation }) => {
       {questComplete && (
         <View style={styles.completeOverlay}>
           <GameIcon name="celebrate" size={48} color={COLORS.gold} />
-          <Text style={styles.completeTitle}>Quest Complete!</Text>
+          <Text style={styles.completeTitle}>{t('quest.questComplete')}</Text>
           <Button
-            title="Claim Rewards"
+            title={t('quest.claimRewards')}
             onPress={() => setShowCompletionDialog(true)}
           />
         </View>
@@ -279,7 +281,7 @@ const QuestScreen = ({ route, navigation }) => {
         ]}
         onClose={handleCompleteQuest}
         onComplete={handleCompleteQuest}
-        continueText="Claim"
+        continueText={t('quest.claim')}
       />
     </View>
   );

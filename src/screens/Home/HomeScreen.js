@@ -26,6 +26,7 @@ import Button from '../../components/Common/Button';
 import DialogBox from '../../components/Dialog/DialogBox';
 import { GameIcon } from '../../utils/icons';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -33,6 +34,7 @@ const HomeScreen = ({ navigation }) => {
   const { level, playerName, updateStreak } = usePlayer();
   const { currentUser } = useAuth();
   const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
+  const { t } = useLanguage();
   const [showWelcome, setShowWelcome] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
@@ -110,8 +112,8 @@ const HomeScreen = ({ navigation }) => {
         <View style={[styles.header, { maxWidth: maxContentWidth, alignSelf: 'center', width: '100%' }]}>
           <GameIcon name="home" size={fonts.xxl} color={COLORS.primary} />
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, { fontSize: fonts.xxl }]}>Kingdom of UNIX</Text>
-            <Text style={[styles.subtitle, { fontSize: fonts.sm }]}>Learn by Adventure</Text>
+            <Text style={[styles.title, { fontSize: fonts.xxl }]}>{t('common.appTitle')}</Text>
+            <Text style={[styles.subtitle, { fontSize: fonts.sm }]}>{t('home.learnByAdventure')}</Text>
           </View>
           <TouchableOpacity
             style={[styles.settingsButton, clickable()]}
@@ -140,12 +142,12 @@ const HomeScreen = ({ navigation }) => {
             </View>
             <View style={styles.welcomeContent}>
               <Text style={[styles.welcomeTitle, { fontSize: fonts.lg }]}>
-                Welcome back, {displayName}!
+                {t('home.welcomeBack', { name: displayName })}
               </Text>
               <Text style={[styles.welcomeText, { fontSize: fonts.sm }]}>
                 {completedCount === 0
-                  ? 'Your adventure awaits! Start your first quest.'
-                  : `You've completed ${completedCount} quest${completedCount === 1 ? '' : 's'}. Keep going!`}
+                  ? t('home.adventureAwaits')
+                  : t('home.questsCompleted', { count: completedCount, plural: completedCount === 1 ? '' : 's' })}
               </Text>
             </View>
           </View>
@@ -159,7 +161,7 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.zoneHeader}>
                 <GameIcon name={currentZone.icon} size={28} color={currentZone.color || COLORS.primary} />
                 <View style={styles.zoneInfo}>
-                  <Text style={styles.zoneLabel}>Current Zone</Text>
+                  <Text style={styles.zoneLabel}>{t('home.currentZone')}</Text>
                   <Text style={styles.zoneName}>{currentZone.name}</Text>
                 </View>
                 <GameIcon name="arrow" size={22} color={COLORS.textSecondary} />
@@ -177,7 +179,7 @@ const HomeScreen = ({ navigation }) => {
                   />
                 </View>
                 <Text style={styles.zoneProgressText}>
-                  {currentZone.quests.filter(qId => completedQuests.includes(qId)).length}/{currentZone.quests.length} quests
+                  {t('home.questsProgress', { done: currentZone.quests.filter(qId => completedQuests.includes(qId)).length, total: currentZone.quests.length })}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -186,7 +188,7 @@ const HomeScreen = ({ navigation }) => {
           {/* Suggested Quest */}
           {suggestedQuest && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}><GameIcon name="quest" size={18} color={COLORS.primary} /> Suggested Quest</Text>
+              <Text style={styles.sectionTitle}><GameIcon name="quest" size={18} color={COLORS.primary} /> {t('home.suggestedQuest')}</Text>
               <QuestCard 
                 quest={suggestedQuest}
                 onPress={() => navigation.navigate('Quest', { questId: suggestedQuest.id })}
@@ -196,15 +198,15 @@ const HomeScreen = ({ navigation }) => {
 
           {/* Quick Actions */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { fontSize: fonts.lg }]}><GameIcon name="quickAction" size={fonts.lg} color={COLORS.primary} /> Quick Actions</Text>
+            <Text style={[styles.sectionTitle, { fontSize: fonts.lg }]}><GameIcon name="quickAction" size={fonts.lg} color={COLORS.primary} /> {t('home.quickActions')}</Text>
             <View style={styles.actionsGrid}>
               <TouchableOpacity
                 style={[styles.actionCard, { width: actionCardWidth, margin: actionCardMargin }, clickable()]}
                 onPress={() => navigation.getParent()?.navigate('Map')}
               >
                 <GameIcon name="map" size={fonts.xxl} color={COLORS.primary} />
-                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>World Map</Text>
-                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>Explore zones</Text>
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>{t('home.worldMap')}</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>{t('home.exploreZones')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -212,8 +214,8 @@ const HomeScreen = ({ navigation }) => {
                 onPress={() => navigation.getParent()?.navigate('Practice')}
               >
                 <GameIcon name="terminal" size={fonts.xxl} color={COLORS.primary} />
-                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>Practice</Text>
-                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>Free terminal</Text>
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>{t('home.practice')}</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>{t('home.freeTerminal')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -221,8 +223,8 @@ const HomeScreen = ({ navigation }) => {
                 onPress={() => navigation.getParent()?.navigate('Lessons')}
               >
                 <GameIcon name="book" size={fonts.xxl} color={COLORS.primary} />
-                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>Lessons</Text>
-                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>Learn UNIX</Text>
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>{t('home.lessons')}</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>{t('home.learnUnix')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -230,25 +232,25 @@ const HomeScreen = ({ navigation }) => {
                 onPress={() => navigation.getParent()?.navigate('Profile')}
               >
                 <GameIcon name="achievement" size={fonts.xxl} color={COLORS.primary} />
-                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>Achievements</Text>
-                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>{completedCount} earned</Text>
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>{t('home.achievements')}</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>{t('home.earned', { count: completedCount })}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Overall Progress */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}><GameIcon name="progress" size={18} color={COLORS.primary} /> Overall Progress</Text>
+            <Text style={styles.sectionTitle}><GameIcon name="progress" size={18} color={COLORS.primary} /> {t('home.overallProgress')}</Text>
             <View style={styles.progressCard}>
               <View style={styles.progressRow}>
-                <Text style={styles.progressLabel}>Quests Completed</Text>
+                <Text style={styles.progressLabel}>{t('home.questsCompletedLabel')}</Text>
                 <Text style={styles.progressValue}>{completedCount}/{totalQuests}</Text>
               </View>
               <View style={styles.overallProgressBar}>
                 <View style={[styles.overallProgressFill, { width: `${progressPercent}%` }]} />
               </View>
               <View style={styles.progressRow}>
-                <Text style={styles.progressLabel}>Zones Unlocked</Text>
+                <Text style={styles.progressLabel}>{t('home.zonesUnlocked')}</Text>
                 <Text style={styles.progressValue}>{unlockedZones.length}/{ZONE_ORDER.length}</Text>
               </View>
             </View>
@@ -264,11 +266,11 @@ const HomeScreen = ({ navigation }) => {
         characterImage={require('../../../assets/me.png')}
         characterName="Manitriniaina"
         messages={[
-          "Greetings, young traveler! Welcome to the Kingdom of UNIX!",
-          "I am Manitriniaina, your guide on this magical journey into the world of computers.",
-          "Here, you'll learn the ancient art of the Command Line through quests and adventures!",
-          "Don't worry if you've never used a computer terminal before - we start from the very beginning!",
-          "Are you ready to begin your adventure? The Village of Files awaits!",
+          t('home.welcomeMsg1'),
+          t('home.welcomeMsg2'),
+          t('home.welcomeMsg3'),
+          t('home.welcomeMsg4'),
+          t('home.welcomeMsg5'),
         ]}
         onClose={() => setShowWelcome(false)}
         onComplete={handleStartGame}

@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useLesson } from '../../context/LessonContext';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 import { downloadLesson } from '../../utils/lessonExporter';
 
 let lessonsData = null;
@@ -30,6 +31,7 @@ export default function LessonDetailScreen({ route, navigation }) {
   const { chapterId, lessonId } = route.params;
   const { completeLesson, isLessonCompleted } = useLesson();
   const { layout, fonts, spacing, isTablet, isDesktop } = useResponsive();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef(null);
 
@@ -71,7 +73,7 @@ export default function LessonDetailScreen({ route, navigation }) {
   if (!lesson) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Lesson not found</Text>
+        <Text style={styles.errorText}>{t('lessons.lessonNotFound')}</Text>
       </View>
     );
   }
@@ -113,7 +115,7 @@ export default function LessonDetailScreen({ route, navigation }) {
         return (
           <View key={index} style={styles.tipBox}>
             <Text style={[styles.tipText, { fontSize: fonts.sm }]}>
-              <Text style={styles.tipLabel}>Tip: </Text>
+              <Text style={styles.tipLabel}>{t('common.tip')}</Text>
               {section.text}
             </Text>
           </View>
@@ -123,7 +125,7 @@ export default function LessonDetailScreen({ route, navigation }) {
         return (
           <View key={index} style={styles.warningBox}>
             <Text style={[styles.warningText, { fontSize: fonts.sm }]}>
-              <Text style={styles.warningLabel}>Warning: </Text>
+              <Text style={styles.warningLabel}>{t('common.warning')}</Text>
               {section.text}
             </Text>
           </View>
@@ -190,7 +192,7 @@ export default function LessonDetailScreen({ route, navigation }) {
               style={[styles.backButton, clickable()]}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.backText}>← Back</Text>
+              <Text style={styles.backText}>{t('common.back')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.downloadBtn, clickable()]}
@@ -201,7 +203,7 @@ export default function LessonDetailScreen({ route, navigation }) {
                 <ActivityIndicator size="small" color={COLORS.secondary} />
               ) : (
                 <Text style={[styles.downloadBtnText, { fontSize: fonts.sm }]}>
-                  Download PDF
+                  {t('lessons.downloadPdf')}
                 </Text>
               )}
             </TouchableOpacity>
@@ -209,7 +211,7 @@ export default function LessonDetailScreen({ route, navigation }) {
 
           {/* Chapter label */}
           <Text style={[styles.chapterLabel, { fontSize: fonts.xs, color: chapter?.color || COLORS.textMuted }]}>
-            {chapter?.icon} {chapter?.title} — Lesson {currentIndex + 1} of {chapterLessons.length}
+            {chapter?.icon} {chapter?.title} — {t('lessons.lessonOf', { current: currentIndex + 1, total: chapterLessons.length })}
           </Text>
 
           {/* Lesson title */}
@@ -218,7 +220,7 @@ export default function LessonDetailScreen({ route, navigation }) {
           {/* Meta info */}
           <View style={styles.metaRow}>
             <Text style={[styles.metaText, { fontSize: fonts.xs }]}>
-              {lesson.estimatedReadTime || '5 min'}
+              {lesson.estimatedReadTime || t('lessons.defaultReadTime')}
             </Text>
             {lesson.keyCommands?.length > 0 && (
               <View style={styles.commandTags}>
@@ -235,7 +237,7 @@ export default function LessonDetailScreen({ route, navigation }) {
           {completed && (
             <View style={styles.completedBadge}>
               <Text style={[styles.completedText, { fontSize: fonts.sm }]}>
-                ✓ Completed
+                {t('lessons.completed')}
               </Text>
             </View>
           )}
@@ -248,7 +250,7 @@ export default function LessonDetailScreen({ route, navigation }) {
           {/* Examples */}
           {lesson.examples?.length > 0 && (
             <View style={styles.examplesSection}>
-              <Text style={[styles.sectionHeading, { fontSize: fonts.xl }]}>Examples</Text>
+              <Text style={[styles.sectionHeading, { fontSize: fonts.xl }]}>{t('lessons.examplesTitle')}</Text>
               {lesson.examples.map((ex, i) => (
                 <View key={i} style={styles.exampleCard}>
                   <Text style={[styles.exampleDesc, { fontSize: fonts.md }]}>{ex.description}</Text>
@@ -266,7 +268,7 @@ export default function LessonDetailScreen({ route, navigation }) {
           {/* Practice Exercises */}
           {lesson.practiceExercises?.length > 0 && (
             <View style={styles.exercisesSection}>
-              <Text style={[styles.sectionHeading, { fontSize: fonts.xl }]}>Practice Exercises</Text>
+              <Text style={[styles.sectionHeading, { fontSize: fonts.xl }]}>{t('lessons.practiceExercises')}</Text>
               {lesson.practiceExercises.map((ex, i) => (
                 <View key={i} style={styles.exerciseCard}>
                   <Text style={[styles.exerciseInstruction, { fontSize: fonts.md }]}>
@@ -287,7 +289,7 @@ export default function LessonDetailScreen({ route, navigation }) {
               onPress={handleComplete}
             >
               <Text style={[styles.completeButtonText, { fontSize: fonts.lg }]}>
-                Mark as Completed
+                {t('lessons.markCompleted')}
               </Text>
             </TouchableOpacity>
           )}
@@ -299,7 +301,7 @@ export default function LessonDetailScreen({ route, navigation }) {
                 style={[styles.navButton, clickable()]}
                 onPress={() => handleNavigate(prevLesson.id)}
               >
-                <Text style={[styles.navLabel, { fontSize: fonts.xs }]}>Previous</Text>
+                <Text style={[styles.navLabel, { fontSize: fonts.xs }]}>{t('common.previous')}</Text>
                 <Text style={[styles.navTitle, { fontSize: fonts.sm }]} numberOfLines={1}>
                   ← {prevLesson.title}
                 </Text>
@@ -311,7 +313,7 @@ export default function LessonDetailScreen({ route, navigation }) {
                 style={[styles.navButton, styles.navButtonRight, clickable()]}
                 onPress={() => handleNavigate(nextLesson.id)}
               >
-                <Text style={[styles.navLabel, { fontSize: fonts.xs }]}>Next</Text>
+                <Text style={[styles.navLabel, { fontSize: fonts.xs }]}>{t('common.next')}</Text>
                 <Text style={[styles.navTitle, { fontSize: fonts.sm }]} numberOfLines={1}>
                   {nextLesson.title} →
                 </Text>

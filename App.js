@@ -12,6 +12,7 @@ import { GameProvider } from './src/context/GameContext';
 import { PlayerProvider } from './src/context/PlayerContext';
 import { TerminalProvider } from './src/context/TerminalContext';
 import { LessonProvider } from './src/context/LessonContext';
+import { LanguageProvider } from './src/i18n';
 import AppNavigator from './src/navigation/AppNavigator';
 import { COLORS } from './src/constants/theme';
 
@@ -19,17 +20,19 @@ const App = () => {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" backgroundColor={COLORS.background} />
-      <AuthProvider>
-        <GameProvider>
-          <PlayerProvider>
-            <TerminalProvider>
-              <LessonProvider>
-                <AppNavigator />
-              </LessonProvider>
-            </TerminalProvider>
-          </PlayerProvider>
-        </GameProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <GameProvider>
+            <PlayerProvider>
+              <TerminalProvider>
+                <LessonProvider>
+                  <AppNavigator />
+                </LessonProvider>
+              </TerminalProvider>
+            </PlayerProvider>
+          </GameProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 };

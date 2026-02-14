@@ -20,6 +20,7 @@ import QuestCard from '../../components/Quest/QuestCard';
 import DialogBox from '../../components/Dialog/DialogBox';
 import { GameIcon } from '../../utils/icons';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 
 const ZoneScreen = ({ route, navigation }) => {
   const { zoneId } = route.params;
@@ -31,6 +32,7 @@ const ZoneScreen = ({ route, navigation }) => {
   const zoneQuests = zone?.quests.map(qId => QUESTS[qId]).filter(Boolean) || [];
   const progress = getZoneProgress(zoneId);
   const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (zone) {
@@ -47,9 +49,9 @@ const ZoneScreen = ({ route, navigation }) => {
   if (!zone) {
     return (
       <View style={styles.container}>
-        <Header title="Zone Not Found" showBack onLeftPress={() => navigation.goBack()} />
+        <Header title={t('zone.zoneNotFound')} showBack onLeftPress={() => navigation.goBack()} />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>This zone doesn't exist.</Text>
+          <Text style={styles.errorText}>{t('zone.zoneNotExist')}</Text>
         </View>
       </View>
     );
@@ -66,7 +68,7 @@ const ZoneScreen = ({ route, navigation }) => {
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <Header
         title={zone.name}
-        subtitle={`${progress}% Complete`}
+        subtitle={t('zone.percentComplete', { pct: progress })}
         showBack
         onLeftPress={() => navigation.goBack()}
         rightIcon=""
@@ -86,7 +88,7 @@ const ZoneScreen = ({ route, navigation }) => {
           
           {/* Commands taught in this zone */}
           <View style={styles.commandsSection}>
-            <Text style={styles.commandsTitle}>Commands You'll Learn:</Text>
+            <Text style={styles.commandsTitle}>{t('zone.commandsYouLearn')}</Text>
             <View style={styles.commandsList}>
               {zone.commands.map((cmd, index) => (
                 <View key={index} style={styles.commandTag}>
@@ -107,7 +109,7 @@ const ZoneScreen = ({ route, navigation }) => {
               />
             </View>
             <Text style={styles.progressText}>
-              {zone.quests.filter(qId => completedQuests.includes(qId)).length}/{zone.quests.length} Quests Completed
+              {t('zone.questsCompletedProgress', { done: zone.quests.filter(qId => completedQuests.includes(qId)).length, total: zone.quests.length })}
             </Text>
           </View>
         </View>
@@ -123,15 +125,15 @@ const ZoneScreen = ({ route, navigation }) => {
             </View>
             <View style={styles.npcContent}>
               <Text style={styles.npcName}>{zone.story.character}</Text>
-              <Text style={styles.npcRole}>Zone Guide</Text>
+              <Text style={styles.npcRole}>{t('zone.zoneGuide')}</Text>
             </View>
-            <Text style={styles.npcTalk}>Talk</Text>
+            <Text style={styles.npcTalk}>{t('zone.talk')}</Text>
           </TouchableOpacity>
         )}
 
         {/* Quests Section */}
         <View style={styles.questsSection}>
-          <Text style={styles.sectionTitle}><GameIcon name="quest" size={20} color={COLORS.primary} /> Quests</Text>
+          <Text style={styles.sectionTitle}><GameIcon name="quest" size={20} color={COLORS.primary} /> {t('zone.questsTitle')}</Text>
           
           {zoneQuests.map((quest, index) => {
             const isCompleted = completedQuests.includes(quest.id);
@@ -165,9 +167,9 @@ const ZoneScreen = ({ route, navigation }) => {
         {progress === 100 && (
           <View style={styles.completionCard}>
             <GameIcon name="achievement" size={48} color={COLORS.gold} />
-            <Text style={styles.completionTitle}>Zone Complete!</Text>
+            <Text style={styles.completionTitle}>{t('zone.zoneComplete')}</Text>
             <Text style={styles.completionText}>
-              You've mastered all quests in {zone.name}!
+              {t('zone.zoneCompleteMsg', { name: zone.name })}
             </Text>
           </View>
         )}

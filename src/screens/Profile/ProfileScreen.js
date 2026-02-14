@@ -25,10 +25,12 @@ import Badge, { AchievementCard } from '../../components/Badge/Badge';
 import Button from '../../components/Common/Button';
 import { GameIcon } from '../../utils/icons';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage, LANGUAGES } from '../../i18n';
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
+  const { t, language, setLanguage } = useLanguage();
   const {
     xp,
     gold,
@@ -95,26 +97,26 @@ const ProfileScreen = ({ navigation }) => {
   // Handle reset progress
   const handleResetProgress = () => {
     Alert.alert(
-      'Reset Progress',
-      'Are you sure you want to reset ALL your progress? This cannot be undone!',
+      t('profile.resetProgress'),
+      t('profile.resetConfirmMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('profile.reset'),
           style: 'destructive',
           onPress: () => {
             Alert.alert(
-              'Final Confirmation',
-              'This will delete all XP, gold, achievements, and quest progress!',
+              t('profile.finalConfirmation'),
+              t('profile.resetFinalMsg'),
               [
-                { text: 'Keep My Progress', style: 'cancel' },
+                { text: t('profile.keepProgress'), style: 'cancel' },
                 {
-                  text: 'Delete Everything',
+                  text: t('profile.deleteEverything'),
                   style: 'destructive',
                   onPress: () => {
                     resetPlayer();
                     resetGameProgress();
-                    Alert.alert('Progress Reset', 'Your progress has been reset. Start your journey anew!');
+                    Alert.alert(t('profile.progressReset'), t('profile.progressResetMsg'));
                   }
                 },
               ]
@@ -128,11 +130,11 @@ const ProfileScreen = ({ navigation }) => {
   // Handle logout
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to log out?',
+      t('profile.logout'),
+      t('profile.logoutConfirmMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', onPress: () => logout() },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('profile.logout'), onPress: () => logout() },
       ]
     );
   };
@@ -142,34 +144,34 @@ const ProfileScreen = ({ navigation }) => {
     try {
       await switchUser(userId);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to switch user');
+      Alert.alert(t('common.error'), e.message || t('profile.switchUserFailed'));
     }
   };
 
   // Handle delete account
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'This will permanently delete your account and ALL game progress. This cannot be undone!',
+      t('profile.deleteAccount'),
+      t('profile.deleteAccountConfirmMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('profile.delete'),
           style: 'destructive',
           onPress: () => {
             Alert.alert(
-              'Final Confirmation',
-              `Delete account "${currentUser?.displayName || currentUser?.username}"? You will be logged out.`,
+              t('profile.finalConfirmation'),
+              t('profile.deleteUserConfirm', { name: currentUser?.displayName || currentUser?.username }),
               [
-                { text: 'Keep Account', style: 'cancel' },
+                { text: t('profile.keepAccount'), style: 'cancel' },
                 {
-                  text: 'Delete Forever',
+                  text: t('profile.deleteForever'),
                   style: 'destructive',
                   onPress: async () => {
                     try {
                       await deleteAccount(currentUser.id);
                     } catch (e) {
-                      Alert.alert('Error', e.message || 'Failed to delete account');
+                      Alert.alert(t('common.error'), e.message || t('profile.deleteAccountFailed'));
                     }
                   },
                 },
@@ -192,11 +194,11 @@ const ProfileScreen = ({ navigation }) => {
             <Text style={styles.userAvatarText}>{currentUser?.avatar || '🧙'}</Text>
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{currentUser?.displayName || 'Adventurer'}</Text>
-            <Text style={styles.userUsername}>@{currentUser?.username || 'unknown'}</Text>
+            <Text style={styles.userName}>{currentUser?.displayName || t('common.adventurer')}</Text>
+            <Text style={styles.userUsername}>@{currentUser?.username || t('common.unknown')}</Text>
             {currentUser?.isGuest && (
               <View style={styles.guestBadge}>
-                <Text style={styles.guestBadgeText}>Guest</Text>
+                <Text style={styles.guestBadgeText}>{t('common.guest')}</Text>
               </View>
             )}
           </View>
@@ -205,7 +207,7 @@ const ProfileScreen = ({ navigation }) => {
             onPress={handleLogout}
           >
             <GameIcon name="arrow" size={16} color={COLORS.error} />
-            <Text style={styles.logoutButtonText}>Logout</Text>
+            <Text style={styles.logoutButtonText}>{t('profile.logout')}</Text>
           </TouchableOpacity>
         </View>
       </Card>
@@ -229,7 +231,7 @@ const ProfileScreen = ({ navigation }) => {
           <View style={[styles.xpFill, { width: `${Math.min(xpProgress, 100)}%` }]} />
         </View>
         <Text style={styles.xpNeeded}>
-          {nextLevelXP - xp} XP to Level {levelNum + 1}
+          {t('profile.xpToLevel', { xp: nextLevelXP - xp, level: levelNum + 1 })}
         </Text>
       </Card>
 
@@ -238,31 +240,31 @@ const ProfileScreen = ({ navigation }) => {
         <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="challenge" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{completedQuests.length}</Text>
-          <Text style={styles.statLabel}>Quests</Text>
+          <Text style={styles.statLabel}>{t('profile.quests')}</Text>
         </Card>
         <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="map" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{unlockedZones.length}</Text>
-          <Text style={styles.statLabel}>Zones</Text>
+          <Text style={styles.statLabel}>{t('profile.zones')}</Text>
         </Card>
         <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="achievement" size={24} color={COLORS.gold} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{unlockedCount}</Text>
-          <Text style={styles.statLabel}>Badges</Text>
+          <Text style={styles.statLabel}>{t('profile.badges')}</Text>
         </Card>
         <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="keyboard" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{learnedCommands.length}</Text>
-          <Text style={styles.statLabel}>Commands</Text>
+          <Text style={styles.statLabel}>{t('profile.commands')}</Text>
         </Card>
       </View>
 
       {/* Commands Mastery */}
       <Card style={styles.masteryCard}>
-        <Text style={styles.cardTitle}>Command Mastery</Text>
+        <Text style={styles.cardTitle}>{t('profile.commandMastery')}</Text>
         <View style={styles.progressRow}>
           <Text style={styles.progressLabel}>
-            {learnedCommands.length}/{Object.keys(COMMANDS).length} Commands
+            {t('profile.commandsProgress', { learned: learnedCommands.length, total: Object.keys(COMMANDS).length })}
           </Text>
           <Text style={styles.progressPercent}>
             {Math.round((learnedCommands.length / Object.keys(COMMANDS).length) * 100)}%
@@ -295,7 +297,7 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.timeRow}>
           <GameIcon name="streak" size={28} color={COLORS.warning} />
           <View>
-            <Text style={styles.timeLabel}>Total Play Time</Text>
+            <Text style={styles.timeLabel}>{t('profile.totalPlayTime')}</Text>
             <Text style={styles.timeValue}>{formatPlayTime(totalPlayTime)}</Text>
           </View>
         </View>
@@ -307,9 +309,9 @@ const ProfileScreen = ({ navigation }) => {
     <View>
       {/* Achievement Progress */}
       <Card style={styles.achievementProgress}>
-        <Text style={styles.cardTitle}><GameIcon name="achievement" size={16} color={COLORS.gold} /> Achievements</Text>
+        <Text style={styles.cardTitle}><GameIcon name="achievement" size={16} color={COLORS.gold} /> {t('profile.achievementsTitle')}</Text>
         <Text style={styles.achievementCount}>
-          {unlockedCount} / {totalAchievements} Unlocked
+          {t('profile.achievementsUnlocked', { done: unlockedCount, total: totalAchievements })}
         </Text>
         <View style={styles.progressBar}>
           <View
@@ -344,7 +346,7 @@ const ProfileScreen = ({ navigation }) => {
       {/* Switch User Section */}
       {otherUsers.length > 0 && (
         <Card style={styles.settingsCard}>
-          <Text style={styles.cardTitle}><GameIcon name="profile" size={16} color={COLORS.primary} /> Switch User</Text>
+          <Text style={styles.cardTitle}><GameIcon name="profile" size={16} color={COLORS.primary} /> {t('profile.switchUser')}</Text>
           {otherUsers.map(user => (
             <TouchableOpacity
               key={user.id}
@@ -356,7 +358,7 @@ const ProfileScreen = ({ navigation }) => {
               </View>
               <View style={styles.switchUserInfo}>
                 <Text style={styles.switchUserName}>{user.displayName}</Text>
-                <Text style={styles.switchUserUsername}>@{user.username}{user.isGuest ? ' (Guest)' : ''}</Text>
+                <Text style={styles.switchUserUsername}>@{user.username}{user.isGuest ? ` ${t('common.guestSuffix')}` : ''}</Text>
               </View>
               <GameIcon name="arrow" size={16} color={COLORS.textSecondary} />
             </TouchableOpacity>
@@ -366,12 +368,12 @@ const ProfileScreen = ({ navigation }) => {
 
       {/* Preferences */}
       <Card style={styles.settingsCard}>
-        <Text style={styles.cardTitle}><GameIcon name="settings" size={16} color={COLORS.textSecondary} /> Preferences</Text>
+        <Text style={styles.cardTitle}><GameIcon name="settings" size={16} color={COLORS.textSecondary} /> {t('profile.preferences')}</Text>
 
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <GameIcon name="sound" size={18} color={COLORS.primary} />
-            <Text style={styles.settingLabel}>Sound Effects</Text>
+            <Text style={styles.settingLabel}>{t('profile.soundEffects')}</Text>
           </View>
           <Switch
             value={soundEnabled}
@@ -384,7 +386,7 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <GameIcon name="hint" size={18} color={COLORS.warning} />
-            <Text style={styles.settingLabel}>Show Hints</Text>
+            <Text style={styles.settingLabel}>{t('profile.showHints')}</Text>
           </View>
           <Switch
             value={hintsEnabled}
@@ -395,49 +397,72 @@ const ProfileScreen = ({ navigation }) => {
         </View>
       </Card>
 
+      {/* Language Selector */}
+      <Card style={styles.settingsCard}>
+        <Text style={styles.cardTitle}><GameIcon name="settings" size={16} color={COLORS.primary} /> {t('profile.language')}</Text>
+        <View style={styles.languageGrid}>
+          {LANGUAGES.map(lang => (
+            <TouchableOpacity
+              key={lang.code}
+              style={[
+                styles.languageOption,
+                language === lang.code && styles.languageOptionActive,
+                clickable(),
+              ]}
+              onPress={() => setLanguage(lang.code)}
+            >
+              <Text style={styles.languageFlag}>{lang.flag}</Text>
+              <Text style={[styles.languageName, language === lang.code && styles.languageNameActive]}>
+                {lang.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </Card>
+
       {/* Account Actions */}
       <Card style={styles.settingsCard}>
-        <Text style={styles.cardTitle}><GameIcon name="profile" size={16} color={COLORS.textSecondary} /> Account</Text>
+        <Text style={styles.cardTitle}><GameIcon name="profile" size={16} color={COLORS.textSecondary} /> {t('profile.account')}</Text>
 
         <TouchableOpacity
           style={[styles.accountAction, clickable()]}
           onPress={handleLogout}
         >
           <GameIcon name="arrow" size={18} color={COLORS.textSecondary} />
-          <Text style={styles.accountActionText}>Logout</Text>
+          <Text style={styles.accountActionText}>{t('profile.logout')}</Text>
         </TouchableOpacity>
       </Card>
 
       {/* About */}
       <Card style={styles.settingsCard}>
-        <Text style={styles.cardTitle}><GameIcon name="terminal" size={16} color={COLORS.textSecondary} /> About</Text>
+        <Text style={styles.cardTitle}><GameIcon name="terminal" size={16} color={COLORS.textSecondary} /> {t('profile.about')}</Text>
         <View style={styles.aboutRow}>
-          <Text style={styles.aboutLabel}>Version</Text>
+          <Text style={styles.aboutLabel}>{t('profile.version')}</Text>
           <Text style={styles.aboutValue}>1.0.0</Text>
         </View>
         <View style={styles.aboutRow}>
-          <Text style={styles.aboutLabel}>Created by</Text>
-          <Text style={styles.aboutValue}>Kingdom of UNIX Team</Text>
+          <Text style={styles.aboutLabel}>{t('profile.createdBy')}</Text>
+          <Text style={styles.aboutValue}>{t('profile.teamName')}</Text>
         </View>
       </Card>
 
       {/* Danger Zone */}
       <Card style={[styles.settingsCard, styles.dangerCard]}>
-        <Text style={styles.dangerTitle}>Danger Zone</Text>
+        <Text style={styles.dangerTitle}>{t('profile.dangerZone')}</Text>
         <Text style={styles.dangerText}>
-          Resetting your progress will delete all XP, gold, achievements, and quest progress.
+          {t('profile.resetWarning')}
         </Text>
         <Button
-          title="Reset All Progress"
+          title={t('profile.resetAllProgress')}
           onPress={handleResetProgress}
           variant="danger"
         />
         <View style={{ height: SPACING.md }} />
         <Text style={styles.dangerText}>
-          Permanently delete your account and all associated data.
+          {t('profile.deleteAccountWarning')}
         </Text>
         <Button
-          title="Delete Account"
+          title={t('profile.deleteAccount')}
           onPress={handleDeleteAccount}
           variant="danger"
         />
@@ -449,16 +474,16 @@ const ProfileScreen = ({ navigation }) => {
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       {/* Header */}
       <Header
-        title="Profile"
+        title={t('profile.profile')}
         subtitle={currentUser?.displayName || levelTitle}
       />
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
         {[
-          { key: 'stats', label: 'Stats', iconName: 'progress' },
-          { key: 'achievements', label: 'Badges', iconName: 'achievement' },
-          { key: 'settings', label: 'Settings', iconName: 'settings' },
+          { key: 'stats', label: t('profile.stats'), iconName: 'progress' },
+          { key: 'achievements', label: t('profile.badges'), iconName: 'achievement' },
+          { key: 'settings', label: t('profile.settings'), iconName: 'settings' },
         ].map(tab => (
           <TouchableOpacity
             key={tab.key}
@@ -862,6 +887,40 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
     marginBottom: SPACING.md,
+  },
+  // Language selector
+  languageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.surfaceLight,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    gap: SPACING.xs,
+  },
+  languageOptionActive: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary + '15',
+  },
+  languageFlag: {
+    fontSize: 20,
+  },
+  languageName: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights.medium,
+  },
+  languageNameActive: {
+    color: COLORS.primary,
+    fontWeight: FONTS.weights.bold,
   },
 });
 

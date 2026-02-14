@@ -19,12 +19,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 
 const AVATARS = ['🧙', '🧝', '🧛', '🧚', '🦊', '🐉', '🦅', '🐺', '🌟', '⚔️', '🛡️', '🗡️'];
 
 export default function SignupScreen({ navigation }) {
   const { signup } = useAuth();
   const { layout, fonts, spacing, isTablet, isDesktop } = useResponsive();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const [username, setUsername] = useState('');
@@ -39,23 +41,23 @@ export default function SignupScreen({ navigation }) {
     setError('');
 
     if (!username.trim()) {
-      setError('Username is required');
+      setError(t('auth.usernameIsRequired'));
       return;
     }
     if (username.trim().length < 3) {
-      setError('Username must be at least 3 characters');
+      setError(t('auth.usernameTooShort'));
       return;
     }
     if (!password) {
-      setError('Password is required');
+      setError(t('auth.passwordIsRequired'));
       return;
     }
     if (password.length < 4) {
-      setError('Password must be at least 4 characters');
+      setError(t('auth.passwordTooShort'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsNoMatch'));
       return;
     }
 
@@ -68,7 +70,7 @@ export default function SignupScreen({ navigation }) {
         selectedAvatar
       );
     } catch (e) {
-      setError(e.message || 'Signup failed');
+      setError(e.message || t('auth.signupFailed'));
     } finally {
       setLoading(false);
     }
@@ -94,9 +96,9 @@ export default function SignupScreen({ navigation }) {
       >
         {/* Header */}
         <View style={styles.headerSection}>
-          <Text style={[styles.title, { fontSize: fonts.xxl }]}>Create Account</Text>
+          <Text style={[styles.title, { fontSize: fonts.xxl }]}>{t('auth.createAccount')}</Text>
           <Text style={[styles.subtitle, { fontSize: fonts.md }]}>
-            Begin your UNIX adventure
+            {t('auth.beginAdventure')}
           </Text>
         </View>
 
@@ -109,7 +111,7 @@ export default function SignupScreen({ navigation }) {
           ) : null}
 
           {/* Avatar Selection */}
-          <Text style={[styles.label, { fontSize: fonts.sm }]}>Choose Your Avatar</Text>
+          <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.chooseAvatar')}</Text>
           <View style={styles.avatarGrid}>
             {AVATARS.map((avatar) => (
               <TouchableOpacity
@@ -127,10 +129,10 @@ export default function SignupScreen({ navigation }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontSize: fonts.sm }]}>Username *</Text>
+            <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.usernameRequired')}</Text>
             <TextInput
               style={[styles.input, { fontSize: fonts.md }]}
-              placeholder="Choose a username"
+              placeholder={t('auth.chooseUsername')}
               placeholderTextColor={COLORS.textMuted}
               value={username}
               onChangeText={setUsername}
@@ -141,10 +143,10 @@ export default function SignupScreen({ navigation }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontSize: fonts.sm }]}>Display Name</Text>
+            <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.displayName')}</Text>
             <TextInput
               style={[styles.input, { fontSize: fonts.md }]}
-              placeholder="Your display name (optional)"
+              placeholder={t('auth.displayNameOptional')}
               placeholderTextColor={COLORS.textMuted}
               value={displayName}
               onChangeText={setDisplayName}
@@ -153,10 +155,10 @@ export default function SignupScreen({ navigation }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontSize: fonts.sm }]}>Password *</Text>
+            <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.passwordRequired')}</Text>
             <TextInput
               style={[styles.input, { fontSize: fonts.md }]}
-              placeholder="Choose a password"
+              placeholder={t('auth.choosePassword')}
               placeholderTextColor={COLORS.textMuted}
               value={password}
               onChangeText={setPassword}
@@ -166,10 +168,10 @@ export default function SignupScreen({ navigation }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontSize: fonts.sm }]}>Confirm Password *</Text>
+            <Text style={[styles.label, { fontSize: fonts.sm }]}>{t('auth.confirmPassword')}</Text>
             <TextInput
               style={[styles.input, { fontSize: fonts.md }]}
-              placeholder="Confirm your password"
+              placeholder={t('auth.confirmYourPassword')}
               placeholderTextColor={COLORS.textMuted}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -188,7 +190,7 @@ export default function SignupScreen({ navigation }) {
               <ActivityIndicator color={COLORS.background} size="small" />
             ) : (
               <Text style={[styles.primaryButtonText, { fontSize: fonts.lg }]}>
-                Create Account
+                {t('auth.createAccount')}
               </Text>
             )}
           </TouchableOpacity>
@@ -199,7 +201,7 @@ export default function SignupScreen({ navigation }) {
             disabled={loading}
           >
             <Text style={[styles.backButtonText, { fontSize: fonts.md }]}>
-              Already have an account? Sign In
+              {t('auth.alreadyHaveAccount')}
             </Text>
           </TouchableOpacity>
         </View>

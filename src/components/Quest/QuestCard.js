@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { GameIcon } from '../../utils/icons';
+import { useLanguage } from '../../i18n';
 
 const QuestCard = ({
   quest,
@@ -22,6 +23,8 @@ const QuestCard = ({
   compact = false,
 }) => {
   if (!quest) return null;
+
+  const { t } = useLanguage();
 
   const getDifficultyColor = () => {
     switch (quest.difficulty) {
@@ -80,7 +83,7 @@ const QuestCard = ({
             {quest.name}
           </Text>
           <Text style={styles.compactReward}>
-            +{quest.xpReward} XP
+            {t('questCard.plusXp', { xp: quest.xpReward })}
           </Text>
         </View>
         {isActive && <View style={styles.activeIndicator} />}
@@ -122,7 +125,7 @@ const QuestCard = ({
 
       {/* Description */}
       <Text style={[styles.description, isLocked && styles.lockedText]} numberOfLines={2}>
-        {isLocked ? 'Complete previous quests to unlock' : quest.description}
+        {isLocked ? t('questCard.lockedDescription') : quest.description}
       </Text>
 
       {/* Progress Bar (if active) */}
@@ -132,7 +135,7 @@ const QuestCard = ({
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
           </View>
           <Text style={styles.progressText}>
-            {completedObjectives}/{totalObjectives} objectives
+            {t('questCard.objectivesProgress', { done: completedObjectives, total: totalObjectives })}
           </Text>
         </View>
       )}
@@ -140,8 +143,8 @@ const QuestCard = ({
       {/* Footer */}
       <View style={styles.footer}>
         <View style={styles.rewards}>
-          <Text style={styles.rewardText}><GameIcon name="xp" size={14} color={COLORS.gold} /> {quest.xpReward} XP</Text>
-          <Text style={styles.rewardText}><GameIcon name="gold" size={14} color={COLORS.gold} /> {quest.goldReward} Gold</Text>
+          <Text style={styles.rewardText}><GameIcon name="xp" size={14} color={COLORS.gold} /> {t('questCard.xpReward', { xp: quest.xpReward })}</Text>
+          <Text style={styles.rewardText}><GameIcon name="gold" size={14} color={COLORS.gold} /> {t('questCard.goldReward', { gold: quest.goldReward })}</Text>
         </View>
         <View style={styles.timeEstimate}>
           <Text style={styles.timeText}>{quest.estimatedTime}</Text>
@@ -151,13 +154,13 @@ const QuestCard = ({
       {/* Status Indicator */}
       {isCompleted && (
         <View style={styles.completedBanner}>
-          <Text style={styles.completedText}>COMPLETED</Text>
+          <Text style={styles.completedText}>{t('questCard.completedBanner')}</Text>
         </View>
       )}
 
       {isActive && (
         <View style={styles.activeBanner}>
-          <Text style={styles.activeText}>IN PROGRESS</Text>
+          <Text style={styles.activeText}>{t('questCard.inProgressBanner')}</Text>
         </View>
       )}
     </TouchableOpacity>

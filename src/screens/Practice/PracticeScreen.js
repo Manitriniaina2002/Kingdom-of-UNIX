@@ -21,6 +21,7 @@ import Terminal from '../../components/Terminal/Terminal';
 import Card from '../../components/Common/Card';
 import { GameIcon } from '../../utils/icons';
 import { useResponsive, clickable } from '../../utils/responsive';
+import { useLanguage } from '../../i18n';
 
 const PracticeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -31,6 +32,7 @@ const PracticeScreen = ({ navigation }) => {
   const [selectedCommand, setSelectedCommand] = useState(null);
   const [showCommandRef, setShowCommandRef] = useState(false);
   const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
+  const { t } = useLanguage();
 
   // Initialize practice filesystem
   useEffect(() => {
@@ -77,8 +79,8 @@ const PracticeScreen = ({ navigation }) => {
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       {/* Header */}
       <Header
-        title="Practice Terminal"
-        subtitle="Sandbox Mode"
+        title={t('practice.practiceTerminal')}
+        subtitle={t('practice.sandboxMode')}
         rightIcon=""
         onRightPress={handleResetTerminal}
       />
@@ -89,7 +91,7 @@ const PracticeScreen = ({ navigation }) => {
           onCommandExecuted={handleCommandExecuted}
           height={layout.terminalHeight}
           questMode={false}
-          placeholder="Try any command..."
+          placeholder={t('practice.tryAnyCommand')}
         />
       </View>
 
@@ -99,7 +101,7 @@ const PracticeScreen = ({ navigation }) => {
         onPress={() => setShowCommandRef(!showCommandRef)}
       >
         <Text style={styles.refToggleText}>
-          {showCommandRef ? '▼ Hide Command Reference' : '▲ Show Command Reference'}
+          {showCommandRef ? t('practice.hideCommandRef') : t('practice.showCommandRef')}
         </Text>
       </TouchableOpacity>
 
@@ -113,17 +115,17 @@ const PracticeScreen = ({ navigation }) => {
                 <View style={styles.selectedHeader}>
                   <Text style={styles.selectedName}>{selectedCommand.name}</Text>
                   <Text style={styles.selectedDifficulty}>
-                    {selectedCommand.difficulty === 1 ? 'Easy' : 
-                     selectedCommand.difficulty === 2 ? 'Medium' : 'Hard'}
+                    {selectedCommand.difficulty === 1 ? t('practice.easy') : 
+                     selectedCommand.difficulty === 2 ? t('practice.medium') : t('practice.hard')}
                   </Text>
                 </View>
                 <Text style={styles.selectedFun}>{selectedCommand.funExplanation}</Text>
                 <View style={styles.syntaxBox}>
-                  <Text style={styles.syntaxLabel}>Syntax:</Text>
+                  <Text style={styles.syntaxLabel}>{t('practice.syntax')}</Text>
                   <Text style={styles.syntaxText}>{selectedCommand.syntax}</Text>
                 </View>
                 <View style={styles.examplesBox}>
-                  <Text style={styles.examplesLabel}>Examples:</Text>
+                  <Text style={styles.examplesLabel}>{t('practice.examples')}</Text>
                   {selectedCommand.examples.map((ex, idx) => (
                     <Text key={idx} style={styles.exampleText}>• {ex}</Text>
                   ))}
@@ -165,7 +167,7 @@ const PracticeScreen = ({ navigation }) => {
 
             {/* Quick Tips */}
             <Card style={styles.tipsCard}>
-              <Text style={styles.tipsTitle}><GameIcon name="tips" size={16} color={COLORS.warning} /> Quick Tips</Text>
+              <Text style={styles.tipsTitle}><GameIcon name="tips" size={16} color={COLORS.warning} /> {t('practice.quickTips')}</Text>
               <Text style={styles.tipText}>• Use <Text style={styles.tipCmd}>help</Text> to see available commands</Text>
               <Text style={styles.tipText}>• Use <Text style={styles.tipCmd}>ls -la</Text> for detailed file info</Text>
               <Text style={styles.tipText}>• Use <Text style={styles.tipCmd}>tree</Text> to visualize directory structure</Text>
@@ -174,9 +176,9 @@ const PracticeScreen = ({ navigation }) => {
 
             {/* Stats */}
             <Card style={styles.statsCard}>
-              <Text style={styles.statsTitle}><GameIcon name="progress" size={16} color={COLORS.primary} /> Your Stats</Text>
+              <Text style={styles.statsTitle}><GameIcon name="progress" size={16} color={COLORS.primary} /> {t('practice.yourStats')}</Text>
               <View style={styles.statRow}>
-                <Text style={styles.statLabel}>Commands Learned:</Text>
+                <Text style={styles.statLabel}>{t('practice.commandsLearned')}</Text>
                 <Text style={styles.statValue}>{learnedCommands.length}/{Object.keys(COMMANDS).length}</Text>
               </View>
               <View style={styles.progressBar}>
