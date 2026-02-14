@@ -11,10 +11,22 @@ import * as FileSystem from 'expo-file-system';
 const escapeHtml = (str) =>
   str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+// Translated labels for PDF export
+const PDF_LABELS = {
+  en: { tip: 'Tip', warning: 'Warning', examples: 'Examples', exercises: 'Practice Exercises', hint: 'Hint', commands: 'Commands', none: 'None', courseTitle: 'Complete UNIX Command Line Course', generated: 'Generated from the Kingdom of UNIX app', share: 'Share', shareCourse: 'Share Kingdom of UNIX Course' },
+  fr: { tip: 'Astuce', warning: 'Attention', examples: 'Exemples', exercises: 'Exercices pratiques', hint: 'Indice', commands: 'Commandes', none: 'Aucune', courseTitle: 'Cours complet de la ligne de commande UNIX', generated: 'Généré depuis l\'application Kingdom of UNIX', share: 'Partager', shareCourse: 'Partager le cours Kingdom of UNIX' },
+  mg: { tip: 'Torohevitra', warning: 'Fampitandremana', examples: 'Ohatra', exercises: 'Fanazaran-tena', hint: 'Soso-kevitra', commands: 'Baiko', none: 'Tsy misy', courseTitle: 'Lesona feno amin\'ny baiko UNIX', generated: 'Noforonina avy amin\'ny application Kingdom of UNIX', share: 'Zaraina', shareCourse: 'Zaraina ny lesona Kingdom of UNIX' },
+};
+
+function getLabels(lang) {
+  return PDF_LABELS[lang] || PDF_LABELS.en;
+}
+
 /**
  * Generate styled HTML for a single lesson
  */
-export function generateLessonHTML(lesson, chapterTitle = '') {
+export function generateLessonHTML(lesson, chapterTitle = '', lang = 'en') {
+  const labels = getLabels(lang);
   const sections = lesson.content.map((section) => {
     switch (section.type) {
       case 'heading':
@@ -27,9 +39,9 @@ export function generateLessonHTML(lesson, chapterTitle = '') {
           ${section.output ? `<div class="code-output">${escapeHtml(section.output)}</div>` : ''}
         </div>`;
       case 'tip':
-        return `<div class="tip-box"><strong>Tip:</strong> ${escapeHtml(section.text)}</div>`;
+        return `<div class="tip-box"><strong>${labels.tip}:</strong> ${escapeHtml(section.text)}</div>`;
       case 'warning':
-        return `<div class="warning-box"><strong>Warning:</strong> ${escapeHtml(section.text)}</div>`;
+        return `<div class="warning-box"><strong>${labels.warning}:</strong> ${escapeHtml(section.text)}</div>`;
       case 'list':
         return `<ul>${section.items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
       case 'table':
@@ -45,7 +57,7 @@ export function generateLessonHTML(lesson, chapterTitle = '') {
   }).join('\n');
 
   const examples = lesson.examples?.length ? `
-    <h2>Examples</h2>
+    <h2>${labels.examples}</h2>
     ${lesson.examples.map(ex => `
       <div class="example">
         <p class="example-desc">${escapeHtml(ex.description)}</p>
@@ -58,11 +70,11 @@ export function generateLessonHTML(lesson, chapterTitle = '') {
   ` : '';
 
   const exercises = lesson.practiceExercises?.length ? `
-    <h2>Practice Exercises</h2>
+    <h2>${labels.exercises}</h2>
     ${lesson.practiceExercises.map((ex, i) => `
       <div class="exercise">
         <p><strong>${i + 1}.</strong> ${escapeHtml(ex.instruction)}</p>
-        <p class="exercise-hint"><em>Hint: ${escapeHtml(ex.hint)}</em></p>
+        <p class="exercise-hint"><em>${labels.hint}: ${escapeHtml(ex.hint)}</em></p>
       </div>
     `).join('')}
   ` : '';
@@ -71,7 +83,7 @@ export function generateLessonHTML(lesson, chapterTitle = '') {
     <div class="lesson">
       ${chapterTitle ? `<p class="chapter-label">${escapeHtml(chapterTitle)}</p>` : ''}
       <h1>${escapeHtml(lesson.title)}</h1>
-      <p class="meta">${lesson.estimatedReadTime || ''} | Commands: ${(lesson.keyCommands || []).join(', ') || 'None'}</p>
+      <p class="meta">${lesson.estimatedReadTime || ''} | ${labels.commands}: ${(lesson.keyCommands || []).join(', ') || labels.none}</p>
       ${sections}
       ${examples}
       ${exercises}
@@ -146,12 +158,13 @@ function wrapInDocument(bodyHtml, title = 'Kingdom of UNIX - Lessons') {
 /**
  * Generate complete HTML document for all lessons grouped by chapter
  */
-export function generateAllLessonsHTML(chapters, allLessons) {
+export function generateAllLessonsHTML(chapters, allLessons, lang = 'en') {
+  const labels = getLabels(lang);
   const coverHtml = `
     <div class="cover">
       <h1>Kingdom of UNIX</h1>
-      <p>Complete UNIX Command Line Course</p>
-      <p style="margin-top: 20px; color: #6E7681;">Generated from the Kingdom of UNIX app</p>
+      <p>${escapeHtml(labels.courseTitle)}</p>
+      <p style="margin-top: 20px; color: #6E7681;">${escapeHtml(labels.generated)}</p>
     </div>
   `;
 
@@ -161,7 +174,7 @@ export function generateAllLessonsHTML(chapters, allLessons) {
 
     const lessonsHtml = chapterLessons
       .sort((a, b) => a.order - b.order)
-      .map(lesson => generateLessonHTML(lesson, chapter.title))
+      .map(lesson => generateLessonHTML(lesson, chapter.title, lang))
       .join('\n');
 
     return lessonsHtml;
@@ -173,9 +186,10 @@ export function generateAllLessonsHTML(chapters, allLessons) {
 /**
  * Download a single lesson as PDF
  */
-export async function downloadLesson(lesson, chapterTitle = '') {
+export async function downloadLesson(lesson, chapterTitle = '', lang = 'en') {
+  const labels = getLabels(lang);
   const html = wrapInDocument(
-    generateLessonHTML(lesson, chapterTitle),
+    generateLessonHTML(lesson, chapterTitle, lang),
     `Kingdom of UNIX - ${lesson.title}`
   );
 
@@ -189,7 +203,7 @@ export async function downloadLesson(lesson, chapterTitle = '') {
   if (Platform.OS !== 'web' && await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(newUri, {
       mimeType: 'application/pdf',
-      dialogTitle: `Share ${lesson.title}`,
+      dialogTitle: `${labels.share} ${lesson.title}`,
     });
   }
 
@@ -199,8 +213,9 @@ export async function downloadLesson(lesson, chapterTitle = '') {
 /**
  * Download all lessons as a single PDF document
  */
-export async function downloadAllLessons(chapters, allLessons) {
-  const html = generateAllLessonsHTML(chapters, allLessons);
+export async function downloadAllLessons(chapters, allLessons, lang = 'en') {
+  const labels = getLabels(lang);
+  const html = generateAllLessonsHTML(chapters, allLessons, lang);
 
   const { uri } = await Print.printToFileAsync({ html });
 
@@ -212,7 +227,7 @@ export async function downloadAllLessons(chapters, allLessons) {
   if (Platform.OS !== 'web' && await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(newUri, {
       mimeType: 'application/pdf',
-      dialogTitle: 'Share Kingdom of UNIX Course',
+      dialogTitle: labels.shareCourse,
     });
   }
 

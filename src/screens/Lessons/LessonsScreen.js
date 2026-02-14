@@ -19,28 +19,20 @@ import { useLesson } from '../../context/LessonContext';
 import { useResponsive, clickable } from '../../utils/responsive';
 import { useLanguage } from '../../i18n';
 import { downloadAllLessons } from '../../utils/lessonExporter';
-
-// Lazy import lessons data to avoid circular dependency issues
-let lessonsData = null;
-function getLessonsData() {
-  if (!lessonsData) {
-    lessonsData = require('../../data/lessons');
-  }
-  return lessonsData;
-}
+import { getLessonsForLang } from '../../data/lessonsI18n';
 
 export default function LessonsScreen({ navigation }) {
   const { completedLessons } = useLesson();
   const { layout, fonts, spacing, isTablet, isDesktop, width } = useResponsive();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [downloading, setDownloading] = useState(false);
 
-  const { CHAPTERS, getAllLessons, getLessonsByChapter, getChapterProgress } = getLessonsData();
+  const { CHAPTERS, getAllLessons, getLessonsByChapter, getChapterProgress } = getLessonsForLang(language);
 
-  const allLessons = useMemo(() => getAllLessons(), []);
+  const allLessons = useMemo(() => getAllLessons(), [language]);
 
   const filteredChapters = useMemo(() => {
     if (!searchQuery.trim()) return CHAPTERS;
@@ -56,7 +48,7 @@ export default function LessonsScreen({ navigation }) {
         )
       );
     });
-  }, [searchQuery]);
+  }, [searchQuery, language]);
 
   const totalProgress = useMemo(() => {
     const total = allLessons.length;
@@ -67,7 +59,7 @@ export default function LessonsScreen({ navigation }) {
   const handleDownloadAll = async () => {
     setDownloading(true);
     try {
-      await downloadAllLessons(CHAPTERS, allLessons);
+      await downloadAllLessons(CHAPTERS, allLessons, language);
     } catch (error) {
       console.error('Download error:', error);
     } finally {

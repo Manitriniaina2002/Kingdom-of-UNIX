@@ -18,32 +18,25 @@ import { useLesson } from '../../context/LessonContext';
 import { useResponsive, clickable } from '../../utils/responsive';
 import { useLanguage } from '../../i18n';
 import { downloadLesson } from '../../utils/lessonExporter';
-
-let lessonsData = null;
-function getLessonsData() {
-  if (!lessonsData) {
-    lessonsData = require('../../data/lessons');
-  }
-  return lessonsData;
-}
+import { getLessonsForLang } from '../../data/lessonsI18n';
 
 export default function LessonDetailScreen({ route, navigation }) {
   const { chapterId, lessonId } = route.params;
   const { completeLesson, isLessonCompleted } = useLesson();
   const { layout, fonts, spacing, isTablet, isDesktop } = useResponsive();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef(null);
 
   const [downloading, setDownloading] = useState(false);
 
-  const { CHAPTERS, LESSONS, getLessonsByChapter } = getLessonsData();
+  const { CHAPTERS, LESSONS, getLessonsByChapter } = getLessonsForLang(language);
 
   const chapter = CHAPTERS.find(c => c.id === chapterId);
   const lesson = LESSONS[lessonId];
   const chapterLessons = useMemo(
     () => getLessonsByChapter(chapterId),
-    [chapterId]
+    [chapterId, language]
   );
 
   const currentIndex = chapterLessons.findIndex(l => l.id === lessonId);
@@ -62,7 +55,7 @@ export default function LessonDetailScreen({ route, navigation }) {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      await downloadLesson(lesson, chapter?.title);
+      await downloadLesson(lesson, chapter?.title, language);
     } catch (error) {
       console.error('Download error:', error);
     } finally {
