@@ -413,7 +413,7 @@ const ProfileScreen = ({ navigation }) => {
             >
               <Text style={styles.languageFlag}>{lang.flag}</Text>
               <Text style={[styles.languageName, language === lang.code && styles.languageNameActive]}>
-                {lang.name}
+                {lang.label}
               </Text>
             </TouchableOpacity>
           ))}
