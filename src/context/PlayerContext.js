@@ -245,8 +245,15 @@ export function PlayerProvider({ children }) {
       const profile = await loadPlayerProfile(db, uid);
 
       if (!profile) {
-        // New user – use defaults
-        dispatch({ type: ACTIONS.LOAD_STATE, payload: { createdAt: new Date().toISOString() } });
+        // New user – use auth display name and avatar
+        dispatch({
+          type: ACTIONS.LOAD_STATE,
+          payload: {
+            playerName: currentUser?.displayName || 'ATRIKA',
+            avatar: currentUser?.avatar || '',
+            createdAt: new Date().toISOString(),
+          },
+        });
         return;
       }
 
@@ -261,6 +268,7 @@ export function PlayerProvider({ children }) {
       dispatch({
         type: ACTIONS.LOAD_STATE,
         payload: {
+          playerName: profile.player_name || 'ATRIKA',
           avatar: profile.avatar || '',
           createdAt: profile.created_at,
           xp: profile.xp,

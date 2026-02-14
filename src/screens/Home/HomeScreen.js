@@ -135,10 +135,9 @@ const HomeScreen = ({ navigation }) => {
         >
           {/* Welcome Banner */}
           <View style={styles.welcomeBanner}>
-            <Image
-              source={require('../../../assets/ATRIKA.png')}
-              style={styles.welcomePhoto}
-            />
+            <View style={styles.welcomeAvatarContainer}>
+              <Text style={styles.welcomeAvatar}>{currentUser?.avatar || '🧙'}</Text>
+            </View>
             <View style={styles.welcomeContent}>
               <Text style={[styles.welcomeTitle, { fontSize: fonts.lg }]}>
                 Welcome back, {displayName}!
@@ -339,6 +338,20 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
     borderWidth: 2,
     borderColor: COLORS.primary,
+  },
+  welcomeAvatarContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginRight: SPACING.md,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeAvatar: {
+    fontSize: 28,
   },
   welcomeContent: {
     flex: 1,

@@ -8,10 +8,10 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { usePlayer } from '../../context/PlayerContext';
+import { useAuth } from '../../context/AuthContext';
 import { GameIcon } from '../../utils/icons';
 
 const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
@@ -25,12 +25,15 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
     xpToNextLevel,
     currentStreak,
   } = usePlayer();
+  const { currentUser } = useAuth();
+  const displayAvatar = avatar || currentUser?.avatar || '🧙';
+  const displayName = currentUser?.displayName || playerName;
 
   if (compact) {
     return (
       <TouchableOpacity style={styles.compactContainer} onPress={onProfilePress}>
         <View style={styles.compactAvatar}>
-          <Image source={require('../../../assets/ATRIKA.png')} style={styles.compactAvatarImage} />
+          <Text style={styles.compactAvatarText}>{displayAvatar}</Text>
         </View>
         <View style={styles.compactLevel}>
           <Text style={styles.compactLevelText}>{level.level}</Text>
@@ -48,13 +51,13 @@ const PlayerStatsBar = ({ onProfilePress, compact = false }) => {
       {/* Avatar and Level */}
       <TouchableOpacity style={styles.profileSection} onPress={onProfilePress}>
         <View style={styles.avatarContainer}>
-          <Image source={require('../../../assets/ATRIKA.png')} style={styles.avatarImage} />
+          <Text style={styles.avatar}>{displayAvatar}</Text>
           <View style={styles.levelBadge}>
             <Text style={styles.levelText}>{level.level}</Text>
           </View>
         </View>
         <View style={styles.nameSection}>
-          <Text style={styles.playerName} numberOfLines={1}>{playerName}</Text>
+          <Text style={styles.playerName} numberOfLines={1}>{displayName}</Text>
           <Text style={styles.levelTitle}>{level.title}</Text>
         </View>
       </TouchableOpacity>
