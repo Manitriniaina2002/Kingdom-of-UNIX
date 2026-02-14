@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
+import { useAuth } from '../../context/AuthContext';
 import { ZONES, ZONE_ORDER } from '../../data/zones';
 import { QUESTS } from '../../data/quests';
 import PlayerStatsBar from '../../components/Player/PlayerStatsBar';
@@ -24,11 +25,14 @@ import QuestCard from '../../components/Quest/QuestCard';
 import Button from '../../components/Common/Button';
 import DialogBox from '../../components/Dialog/DialogBox';
 import { GameIcon } from '../../utils/icons';
+import { useResponsive, clickable } from '../../utils/responsive';
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { gameStarted, startGame, completedQuests, unlockedZones, currentQuest } = useGame();
   const { level, playerName, updateStreak } = usePlayer();
+  const { currentUser } = useAuth();
+  const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
   const [showWelcome, setShowWelcome] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
@@ -95,45 +99,52 @@ const HomeScreen = ({ navigation }) => {
 
   const currentZone = getCurrentZone();
 
+  const displayName = currentUser?.displayName || playerName;
+  const actionCardWidth = isDesktop ? '23%' : isTablet ? '31%' : '48%';
+  const actionCardMargin = isDesktop ? '1%' : isTablet ? '1.16%' : '1%';
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+      <Animated.View style={[styles.content, { opacity: fadeAnim, paddingHorizontal: layout.contentPadding }]}>
         {/* Header */}
-        <View style={styles.header}>
-          <GameIcon name="home" size={28} color={COLORS.primary} />
+        <View style={[styles.header, { maxWidth: maxContentWidth, alignSelf: 'center', width: '100%' }]}>
+          <GameIcon name="home" size={fonts.xxl} color={COLORS.primary} />
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Kingdom of UNIX</Text>
-            <Text style={styles.subtitle}>Learn by Adventure</Text>
+            <Text style={[styles.title, { fontSize: fonts.xxl }]}>Kingdom of UNIX</Text>
+            <Text style={[styles.subtitle, { fontSize: fonts.sm }]}>Learn by Adventure</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.settingsButton}
+          <TouchableOpacity
+            style={[styles.settingsButton, clickable()]}
             onPress={() => navigation.getParent()?.navigate('Profile')}
           >
-            <GameIcon name="settings" size={22} color={COLORS.textSecondary} />
+            <GameIcon name="settings" size={fonts.lg} color={COLORS.textSecondary} />
           </TouchableOpacity>
         </View>
 
         {/* Player Stats */}
-        <PlayerStatsBar 
-          onProfilePress={() => navigation.getParent()?.navigate('Profile')}
-        />
+        <View style={{ maxWidth: maxContentWidth, alignSelf: 'center', width: '100%' }}>
+          <PlayerStatsBar
+            onProfilePress={() => navigation.getParent()?.navigate('Profile')}
+          />
+        </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ maxWidth: maxContentWidth, alignSelf: 'center', width: '100%' }}
         >
           {/* Welcome Banner */}
           <View style={styles.welcomeBanner}>
-            <Image 
+            <Image
               source={require('../../../assets/ATRIKA.png')}
               style={styles.welcomePhoto}
             />
             <View style={styles.welcomeContent}>
-              <Text style={styles.welcomeTitle}>
-                Welcome back, {playerName}!
+              <Text style={[styles.welcomeTitle, { fontSize: fonts.lg }]}>
+                Welcome back, {displayName}!
               </Text>
-              <Text style={styles.welcomeText}>
-                {completedCount === 0 
+              <Text style={[styles.welcomeText, { fontSize: fonts.sm }]}>
+                {completedCount === 0
                   ? 'Your adventure awaits! Start your first quest.'
                   : `You've completed ${completedCount} quest${completedCount === 1 ? '' : 's'}. Keep going!`}
               </Text>
@@ -186,42 +197,42 @@ const HomeScreen = ({ navigation }) => {
 
           {/* Quick Actions */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}><GameIcon name="quickAction" size={18} color={COLORS.primary} /> Quick Actions</Text>
+            <Text style={[styles.sectionTitle, { fontSize: fonts.lg }]}><GameIcon name="quickAction" size={fonts.lg} color={COLORS.primary} /> Quick Actions</Text>
             <View style={styles.actionsGrid}>
-              <TouchableOpacity 
-                style={styles.actionCard}
+              <TouchableOpacity
+                style={[styles.actionCard, { width: actionCardWidth, margin: actionCardMargin }, clickable()]}
                 onPress={() => navigation.getParent()?.navigate('Map')}
               >
-                <GameIcon name="map" size={28} color={COLORS.primary} />
-                <Text style={styles.actionTitle}>World Map</Text>
-                <Text style={styles.actionDesc}>Explore zones</Text>
+                <GameIcon name="map" size={fonts.xxl} color={COLORS.primary} />
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>World Map</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>Explore zones</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={styles.actionCard}
+              <TouchableOpacity
+                style={[styles.actionCard, { width: actionCardWidth, margin: actionCardMargin }, clickable()]}
                 onPress={() => navigation.getParent()?.navigate('Practice')}
               >
-                <GameIcon name="terminal" size={28} color={COLORS.primary} />
-                <Text style={styles.actionTitle}>Practice</Text>
-                <Text style={styles.actionDesc}>Free terminal</Text>
+                <GameIcon name="terminal" size={fonts.xxl} color={COLORS.primary} />
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>Practice</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>Free terminal</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={styles.actionCard}
-                onPress={() => navigation.getParent()?.navigate('Profile')}
+              <TouchableOpacity
+                style={[styles.actionCard, { width: actionCardWidth, margin: actionCardMargin }, clickable()]}
+                onPress={() => navigation.getParent()?.navigate('Lessons')}
               >
-                <GameIcon name="guide" size={28} color={COLORS.primary} />
-                <Text style={styles.actionTitle}>Commands</Text>
-                <Text style={styles.actionDesc}>Learn more</Text>
+                <GameIcon name="book" size={fonts.xxl} color={COLORS.primary} />
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>Lessons</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>Learn UNIX</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={styles.actionCard}
+              <TouchableOpacity
+                style={[styles.actionCard, { width: actionCardWidth, margin: actionCardMargin }, clickable()]}
                 onPress={() => navigation.getParent()?.navigate('Profile')}
               >
-                <GameIcon name="achievement" size={28} color={COLORS.primary} />
-                <Text style={styles.actionTitle}>Achievements</Text>
-                <Text style={styles.actionDesc}>{completedCount} earned</Text>
+                <GameIcon name="achievement" size={fonts.xxl} color={COLORS.primary} />
+                <Text style={[styles.actionTitle, { fontSize: fonts.md }]}>Achievements</Text>
+                <Text style={[styles.actionDesc, { fontSize: fonts.xs }]}>{completedCount} earned</Text>
               </TouchableOpacity>
             </View>
           </View>

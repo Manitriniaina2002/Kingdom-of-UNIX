@@ -25,6 +25,7 @@ import Terminal from '../../components/Terminal/Terminal';
 import DialogBox from '../../components/Dialog/DialogBox';
 import Button from '../../components/Common/Button';
 import { GameIcon } from '../../utils/icons';
+import { useResponsive, clickable } from '../../utils/responsive';
 
 const QuestScreen = ({ route, navigation }) => {
   const { questId } = route.params;
@@ -49,6 +50,7 @@ const QuestScreen = ({ route, navigation }) => {
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [questComplete, setQuestComplete] = useState(false);
+  const { layout, fonts, spacing } = useResponsive();
 
   // Initialize quest
   useEffect(() => {
@@ -238,7 +240,7 @@ const QuestScreen = ({ route, navigation }) => {
       <View style={styles.terminalContainer}>
         <Terminal
           onCommandExecuted={handleCommandExecuted}
-          height={280}
+          height={layout.terminalHeight}
           questMode={true}
           placeholder={currentObjective ? `Type: ${currentObjective.command.split(' ')[0]}...` : 'Type a command...'}
         />

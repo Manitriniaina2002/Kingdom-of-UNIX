@@ -1,5 +1,6 @@
 /**
  * App Navigator - Main navigation structure
+ * Supports auth flow, lessons tab, and responsive sidebar on desktop
  */
 
 import React from 'react';
@@ -10,6 +11,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { GameIcon } from '../utils/icons';
+import { useAuth } from '../context/AuthContext';
+import { useResponsive } from '../utils/responsive';
 
 // Screens
 import HomeScreen from '../screens/Home/HomeScreen';
@@ -18,9 +21,14 @@ import ZoneScreen from '../screens/Zone/ZoneScreen';
 import QuestScreen from '../screens/Quest/QuestScreen';
 import PracticeScreen from '../screens/Practice/PracticeScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import LoginScreen from '../screens/Auth/LoginScreen';
+import SignupScreen from '../screens/Auth/SignupScreen';
+import LessonsScreen from '../screens/Lessons/LessonsScreen';
+import LessonDetailScreen from '../screens/Lessons/LessonDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const AuthStack = createNativeStackNavigator();
 
 // Custom Tab Bar Icon component
 const TabIcon = ({ iconName, label, focused }) => (
@@ -33,6 +41,19 @@ const TabIcon = ({ iconName, label, focused }) => (
 // Suppress tab label entirely on all platforms
 const noLabel = () => null;
 
+// Auth Navigator (Login/Signup)
+const AuthNavigator = () => (
+  <AuthStack.Navigator
+    screenOptions={{
+      headerShown: false,
+      animation: 'fade',
+    }}
+  >
+    <AuthStack.Screen name="Login" component={LoginScreen} />
+    <AuthStack.Screen name="Signup" component={SignupScreen} />
+  </AuthStack.Navigator>
+);
+
 // Home Stack Navigator
 const HomeStack = () => (
   <Stack.Navigator
@@ -43,11 +64,11 @@ const HomeStack = () => (
   >
     <Stack.Screen name="HomeMain" component={HomeScreen} />
     <Stack.Screen name="Zone" component={ZoneScreen} />
-    <Stack.Screen 
-      name="Quest" 
-      component={QuestScreen} 
+    <Stack.Screen
+      name="Quest"
+      component={QuestScreen}
       options={{
-        gestureEnabled: false, // Prevent swipe back during quest
+        gestureEnabled: false,
       }}
     />
   </Stack.Navigator>
@@ -63,8 +84,8 @@ const MapStack = () => (
   >
     <Stack.Screen name="WorldMapMain" component={WorldMapScreen} />
     <Stack.Screen name="Zone" component={ZoneScreen} />
-    <Stack.Screen 
-      name="Quest" 
+    <Stack.Screen
+      name="Quest"
       component={QuestScreen}
       options={{
         gestureEnabled: false,
@@ -73,9 +94,23 @@ const MapStack = () => (
   </Stack.Navigator>
 );
 
+// Lessons Stack Navigator
+const LessonsStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: false,
+      animation: 'slide_from_right',
+    }}
+  >
+    <Stack.Screen name="LessonsMain" component={LessonsScreen} />
+    <Stack.Screen name="LessonDetail" component={LessonDetailScreen} />
+  </Stack.Navigator>
+);
+
 // Main Tab Navigator
 const MainTabs = () => {
   const insets = useSafeAreaInsets();
+  const { layout } = useResponsive();
 
   return (
     <Tab.Navigator
@@ -117,6 +152,16 @@ const MainTabs = () => {
         }}
       />
       <Tab.Screen
+        name="Lessons"
+        component={LessonsStack}
+        options={{
+          tabBarLabel: noLabel,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon iconName="book" label="Lessons" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Practice"
         component={PracticeScreen}
         options={{
@@ -140,11 +185,22 @@ const MainTabs = () => {
   );
 };
 
-// Root Navigator
+// Root Navigator - shows auth or main based on authentication state
 const AppNavigator = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingLogo}>⚔️</Text>
+        <Text style={styles.loadingTitle}>Kingdom of UNIX</Text>
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <MainTabs />
+      {isAuthenticated ? <MainTabs /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };
@@ -154,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.sm,
     borderRadius: BORDER_RADIUS.lg,
   },
   tabIconFocused: {
@@ -168,6 +224,21 @@ const styles = StyleSheet.create({
   },
   tabLabelFocused: {
     color: COLORS.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingLogo: {
+    fontSize: 48,
+    marginBottom: SPACING.md,
+  },
+  loadingTitle: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: FONTS.weights.bold,
   },
 });
 

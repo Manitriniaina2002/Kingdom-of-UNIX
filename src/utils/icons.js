@@ -35,6 +35,7 @@ export const ICON_MAP = {
   map: { lib: MaterialCommunityIcons, name: 'map-outline' },
   practice: { lib: MaterialCommunityIcons, name: 'keyboard-outline' },
   profile: { lib: MaterialCommunityIcons, name: 'account-outline' },
+  book: { lib: MaterialCommunityIcons, name: 'book-open-page-variant' },
   settings: { lib: Ionicons, name: 'settings-outline' },
 
   // === Stats ===

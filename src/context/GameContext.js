@@ -2,6 +2,7 @@
  * Game Context - Global game state management
  * Handles zones, quests, and game progression
  * Persistence via SQLite (expo-sqlite)
+ * Multi-user aware: scoped to the current authenticated user
  */
 
 import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
@@ -17,6 +18,7 @@ import {
   insertUnlockedZone,
   resetGameData,
 } from '../database/db';
+import { useAuth } from './AuthContext';
 
 const GameContext = createContext();
 
@@ -51,19 +53,19 @@ function gameReducer(state, action) {
         ...action.payload,
         isLoading: false,
       };
-    
+
     case ACTIONS.SET_CURRENT_ZONE:
       return {
         ...state,
         currentZone: action.payload,
       };
-    
+
     case ACTIONS.SET_CURRENT_QUEST:
       return {
         ...state,
         currentQuest: action.payload,
       };
-    
+
     case ACTIONS.COMPLETE_QUEST:
       if (state.completedQuests.includes(action.payload)) {
         return state;
@@ -72,7 +74,7 @@ function gameReducer(state, action) {
         ...state,
         completedQuests: [...state.completedQuests, action.payload],
       };
-    
+
     case ACTIONS.UNLOCK_ZONE:
       if (state.unlockedZones.includes(action.payload)) {
         return state;
@@ -81,19 +83,19 @@ function gameReducer(state, action) {
         ...state,
         unlockedZones: [...state.unlockedZones, action.payload],
       };
-    
+
     case ACTIONS.START_GAME:
       return {
         ...state,
         gameStarted: true,
       };
-    
+
     case ACTIONS.RESET_GAME:
       return {
         ...initialState,
         isLoading: false,
       };
-    
+
     default:
       return state;
   }
@@ -103,40 +105,48 @@ function gameReducer(state, action) {
 export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const dbRef = useRef(null);
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
 
-  // Open database and load saved state on mount
+  // Reload game state whenever the authenticated user changes
   useEffect(() => {
+    if (!userId) {
+      dispatch({ type: ACTIONS.RESET_GAME });
+      return;
+    }
     (async () => {
       try {
         const db = await openDatabase();
         dbRef.current = db;
-        await loadStateFromDB(db);
+        await loadStateFromDB(db, userId);
       } catch (error) {
         console.error('Error initialising game database:', error);
         dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
       }
     })();
-  }, []);
+  }, [userId]);
 
   // Persist gameStarted flag whenever it changes
   useEffect(() => {
-    if (!state.isLoading && dbRef.current) {
-      saveGameStarted(dbRef.current, state.gameStarted).catch(console.error);
+    if (!state.isLoading && dbRef.current && userId) {
+      saveGameStarted(dbRef.current, userId, state.gameStarted).catch(console.error);
     }
   }, [state.gameStarted]);
 
-  const loadStateFromDB = async (db) => {
+  const loadStateFromDB = async (db, uid) => {
     try {
-      const gsRow = await dbLoadGameState(db);
-      const questRows = await loadCompletedQuests(db);
-      const zoneRows = await loadUnlockedZones(db);
+      const gsRow = await dbLoadGameState(db, uid);
+      const questRows = await loadCompletedQuests(db, uid);
+      const zoneRows = await loadUnlockedZones(db, uid);
 
       dispatch({
         type: ACTIONS.LOAD_STATE,
         payload: {
           gameStarted: !!gsRow?.game_started,
           completedQuests: questRows.map(r => r.quest_id),
-          unlockedZones: zoneRows.map(r => r.zone_id),
+          unlockedZones: zoneRows.length > 0
+            ? zoneRows.map(r => r.zone_id)
+            : ['village'],
         },
       });
     } catch (error) {
@@ -156,11 +166,10 @@ export function GameProvider({ children }) {
 
   const completeQuest = (questId) => {
     dispatch({ type: ACTIONS.COMPLETE_QUEST, payload: questId });
-    // Persist to SQLite
-    if (dbRef.current) {
-      insertCompletedQuest(dbRef.current, questId).catch(console.error);
+    if (dbRef.current && userId) {
+      insertCompletedQuest(dbRef.current, userId, questId).catch(console.error);
     }
-    
+
     // Check if this unlocks a new zone
     const quest = QUESTS[questId];
     if (quest && quest.type === 'boss') {
@@ -169,8 +178,8 @@ export function GameProvider({ children }) {
       if (currentIndex < zoneOrder.length - 1) {
         const nextZone = zoneOrder[currentIndex + 1];
         dispatch({ type: ACTIONS.UNLOCK_ZONE, payload: nextZone });
-        if (dbRef.current) {
-          insertUnlockedZone(dbRef.current, nextZone).catch(console.error);
+        if (dbRef.current && userId) {
+          insertUnlockedZone(dbRef.current, userId, nextZone).catch(console.error);
         }
       }
     }
@@ -178,8 +187,8 @@ export function GameProvider({ children }) {
 
   const unlockZone = (zoneId) => {
     dispatch({ type: ACTIONS.UNLOCK_ZONE, payload: zoneId });
-    if (dbRef.current) {
-      insertUnlockedZone(dbRef.current, zoneId).catch(console.error);
+    if (dbRef.current && userId) {
+      insertUnlockedZone(dbRef.current, userId, zoneId).catch(console.error);
     }
   };
 
@@ -188,17 +197,17 @@ export function GameProvider({ children }) {
   };
 
   const resetGame = async () => {
-    if (dbRef.current) {
-      await resetGameData(dbRef.current);
+    if (dbRef.current && userId) {
+      await resetGameData(dbRef.current, userId);
     }
     dispatch({ type: ACTIONS.RESET_GAME });
   };
 
   // Computed values
   const isZoneUnlocked = (zoneId) => state.unlockedZones.includes(zoneId);
-  
+
   const isQuestCompleted = (questId) => state.completedQuests.includes(questId);
-  
+
   const canStartQuest = (questId) => {
     return isQuestUnlocked(questId, state.completedQuests);
   };
@@ -206,7 +215,7 @@ export function GameProvider({ children }) {
   const getZoneProgress = (zoneId) => {
     const zone = ZONES[zoneId];
     if (!zone) return 0;
-    
+
     const zoneQuests = zone.quests;
     const completed = zoneQuests.filter(qId => state.completedQuests.includes(qId));
     return Math.round((completed.length / zoneQuests.length) * 100);

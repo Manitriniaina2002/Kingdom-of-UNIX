@@ -133,11 +133,16 @@ export const ANIMATION = {
   slow: 500,
 };
 
-// Screen dimensions helpers
+// Screen dimensions helpers (base values - use useResponsive() for adaptive values)
 export const LAYOUT = {
   terminalHeight: 300,
   headerHeight: 60,
   tabBarHeight: 70,
   cardWidth: '90%',
   maxWidth: 400,
+  // Responsive layout constants
+  maxContentWidth: 1200,
+  sidebarWidth: 240,
+  authCardMaxWidth: 480,
+  lessonContentMaxWidth: 800,
 };

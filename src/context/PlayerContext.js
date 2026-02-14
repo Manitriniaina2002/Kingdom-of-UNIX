@@ -1,6 +1,7 @@
 /**
  * Player Context - Player stats, XP, achievements, and inventory
  * Persistence via SQLite (expo-sqlite)
+ * Multi-user aware: scoped to the current authenticated user
  */
 
 import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
@@ -17,6 +18,7 @@ import {
   insertBadge,
   resetPlayerData,
 } from '../database/db';
+import { useAuth } from './AuthContext';
 
 const PlayerContext = createContext();
 
@@ -26,29 +28,29 @@ const initialState = {
   playerName: 'ATRIKA',
   avatar: '',
   createdAt: null,
-  
+
   // Stats
   xp: 0,
   gold: 50,
-  
+
   // Command stats
   totalCommandsExecuted: 0,
   uniqueCommandsUsed: [],
   commandUsageCount: {}, // { 'ls': 15, 'cd': 20, ... }
-  
+
   // Achievements
   unlockedAchievements: [],
   badges: [],
-  
+
   // Settings
   soundEnabled: true,
   hintsEnabled: true,
-  
+
   // Session
   currentStreak: 0,
   lastPlayDate: null,
   totalPlayTime: 0, // in seconds
-  
+
   isLoading: true,
 };
 
@@ -78,43 +80,43 @@ function playerReducer(state, action) {
         ...action.payload,
         isLoading: false,
       };
-    
+
     case ACTIONS.SET_PLAYER_NAME:
       return {
         ...state,
         playerName: action.payload,
       };
-    
+
     case ACTIONS.SET_AVATAR:
       return {
         ...state,
         avatar: action.payload,
       };
-    
+
     case ACTIONS.ADD_XP:
       return {
         ...state,
         xp: state.xp + action.payload,
       };
-    
+
     case ACTIONS.ADD_GOLD:
       return {
         ...state,
         gold: state.gold + action.payload,
       };
-    
+
     case ACTIONS.SPEND_GOLD:
       return {
         ...state,
         gold: Math.max(0, state.gold - action.payload),
       };
-    
+
     case ACTIONS.RECORD_COMMAND: {
       const command = action.payload;
       const newUniqueCommands = state.uniqueCommandsUsed.includes(command)
         ? state.uniqueCommandsUsed
         : [...state.uniqueCommandsUsed, command];
-      
+
       return {
         ...state,
         totalCommandsExecuted: state.totalCommandsExecuted + 1,
@@ -125,7 +127,7 @@ function playerReducer(state, action) {
         },
       };
     }
-    
+
     case ACTIONS.UNLOCK_ACHIEVEMENT:
       if (state.unlockedAchievements.includes(action.payload)) {
         return state;
@@ -134,7 +136,7 @@ function playerReducer(state, action) {
         ...state,
         unlockedAchievements: [...state.unlockedAchievements, action.payload],
       };
-    
+
     case ACTIONS.ADD_BADGE:
       if (state.badges.includes(action.payload)) {
         return state;
@@ -143,49 +145,49 @@ function playerReducer(state, action) {
         ...state,
         badges: [...state.badges, action.payload],
       };
-    
+
     case ACTIONS.UPDATE_SETTINGS:
       return {
         ...state,
         ...action.payload,
       };
-    
+
     case ACTIONS.UPDATE_STREAK: {
       const today = new Date().toDateString();
       const lastPlay = state.lastPlayDate;
-      
+
       let newStreak = 1;
       if (lastPlay) {
         const lastDate = new Date(lastPlay);
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        
+
         if (lastDate.toDateString() === yesterday.toDateString()) {
           newStreak = state.currentStreak + 1;
         } else if (lastDate.toDateString() === today) {
           newStreak = state.currentStreak;
         }
       }
-      
+
       return {
         ...state,
         currentStreak: newStreak,
         lastPlayDate: today,
       };
     }
-    
+
     case ACTIONS.ADD_PLAY_TIME:
       return {
         ...state,
         totalPlayTime: state.totalPlayTime + action.payload,
       };
-    
+
     case ACTIONS.RESET_PLAYER:
       return {
         ...initialState,
         isLoading: false,
       };
-    
+
     default:
       return state;
   }
@@ -195,25 +197,31 @@ function playerReducer(state, action) {
 export function PlayerProvider({ children }) {
   const [state, dispatch] = useReducer(playerReducer, initialState);
   const dbRef = useRef(null);
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
 
-  // Open database & load saved state on mount
+  // Reload player state whenever the authenticated user changes
   useEffect(() => {
+    if (!userId) {
+      dispatch({ type: ACTIONS.RESET_PLAYER });
+      return;
+    }
     (async () => {
       try {
         const db = await openDatabase();
         dbRef.current = db;
-        await loadPlayerStateFromDB(db);
+        await loadPlayerStateFromDB(db, userId);
       } catch (error) {
         console.error('Error initialising player database:', error);
         dispatch({ type: ACTIONS.LOAD_STATE, payload: {} });
       }
     })();
-  }, []);
+  }, [userId]);
 
   // Persist to SQLite whenever relevant fields change
   useEffect(() => {
-    if (!state.isLoading && dbRef.current) {
-      savePlayerStateToDB(dbRef.current, state);
+    if (!state.isLoading && dbRef.current && userId) {
+      savePlayerStateToDB(dbRef.current, userId, state);
     }
   }, [
     state.playerName,
@@ -232,25 +240,27 @@ export function PlayerProvider({ children }) {
     state.hintsEnabled,
   ]);
 
-  const loadPlayerStateFromDB = async (db) => {
+  const loadPlayerStateFromDB = async (db, uid) => {
     try {
-      // Profile row
-      const profile = await loadPlayerProfile(db);
+      const profile = await loadPlayerProfile(db, uid);
 
-      // Commands
-      const cmdRows = await loadPlayerCommands(db);
+      if (!profile) {
+        // New user – use defaults
+        dispatch({ type: ACTIONS.LOAD_STATE, payload: { createdAt: new Date().toISOString() } });
+        return;
+      }
+
+      const cmdRows = await loadPlayerCommands(db, uid);
       const uniqueCommandsUsed = cmdRows.map(r => r.command);
       const commandUsageCount = {};
       cmdRows.forEach(r => { commandUsageCount[r.command] = r.usage_count; });
 
-      // Achievements & badges
-      const achRows = await loadAchievements(db);
-      const badgeRows = await loadBadges(db);
+      const achRows = await loadAchievements(db, uid);
+      const badgeRows = await loadBadges(db, uid);
 
       dispatch({
         type: ACTIONS.LOAD_STATE,
         payload: {
-          // Always force default playerName
           avatar: profile.avatar || '',
           createdAt: profile.created_at,
           xp: profile.xp,
@@ -273,9 +283,9 @@ export function PlayerProvider({ children }) {
     }
   };
 
-  const savePlayerStateToDB = async (db, s) => {
+  const savePlayerStateToDB = async (db, uid, s) => {
     try {
-      await savePlayerProfile(db, s);
+      await savePlayerProfile(db, uid, s);
     } catch (error) {
       console.error('Error saving player profile to SQLite:', error);
     }
@@ -307,12 +317,10 @@ export function PlayerProvider({ children }) {
   };
 
   const recordCommand = (command) => {
-    // Extract base command (first word)
     const baseCommand = command.trim().split(/\s+/)[0].toLowerCase();
     dispatch({ type: ACTIONS.RECORD_COMMAND, payload: baseCommand });
-    // Persist to SQLite
-    if (dbRef.current) {
-      recordCommandUsage(dbRef.current, baseCommand).catch(console.error);
+    if (dbRef.current && userId) {
+      recordCommandUsage(dbRef.current, userId, baseCommand).catch(console.error);
     }
     checkAchievements(baseCommand);
   };
@@ -321,9 +329,8 @@ export function PlayerProvider({ children }) {
     const achievement = ACHIEVEMENTS[achievementId];
     if (achievement && !state.unlockedAchievements.includes(achievementId)) {
       dispatch({ type: ACTIONS.UNLOCK_ACHIEVEMENT, payload: achievementId });
-      // Persist to SQLite
-      if (dbRef.current) {
-        insertAchievement(dbRef.current, achievementId).catch(console.error);
+      if (dbRef.current && userId) {
+        insertAchievement(dbRef.current, userId, achievementId).catch(console.error);
       }
       if (achievement.xpReward) {
         addXP(achievement.xpReward);
@@ -335,9 +342,8 @@ export function PlayerProvider({ children }) {
 
   const addBadge = (badgeId) => {
     dispatch({ type: ACTIONS.ADD_BADGE, payload: badgeId });
-    // Persist to SQLite
-    if (dbRef.current) {
-      insertBadge(dbRef.current, badgeId).catch(console.error);
+    if (dbRef.current && userId) {
+      insertBadge(dbRef.current, userId, badgeId).catch(console.error);
     }
   };
 
@@ -354,8 +360,8 @@ export function PlayerProvider({ children }) {
   };
 
   const resetPlayer = async () => {
-    if (dbRef.current) {
-      await resetPlayerData(dbRef.current);
+    if (dbRef.current && userId) {
+      await resetPlayerData(dbRef.current, userId);
     }
     dispatch({ type: ACTIONS.RESET_PLAYER });
   };
@@ -366,12 +372,10 @@ export function PlayerProvider({ children }) {
     newState.totalCommandsExecuted += 1;
     newState.commandUsageCount[latestCommand] = (newState.commandUsageCount[latestCommand] || 0) + 1;
 
-    // First command achievement
     if (newState.totalCommandsExecuted === 1) {
       unlockAchievement('first_command');
     }
 
-    // Command count achievements
     if (newState.uniqueCommandsUsed.length >= 10) {
       unlockAchievement('command_novice');
     }
@@ -382,7 +386,6 @@ export function PlayerProvider({ children }) {
       unlockAchievement('command_master');
     }
 
-    // Command-specific achievements
     Object.entries(ACHIEVEMENTS).forEach(([id, achievement]) => {
       if (achievement.requirement?.type === 'command_usage') {
         const count = newState.commandUsageCount[achievement.requirement.command] || 0;

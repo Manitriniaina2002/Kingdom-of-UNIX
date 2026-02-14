@@ -1,5 +1,5 @@
 /**
- * Profile Screen - Player stats, achievements, and settings
+ * Profile Screen - Player stats, achievements, settings, and user management
  */
 
 import React, { useState } from 'react';
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { usePlayer } from '../../context/PlayerContext';
 import { useGame } from '../../context/GameContext';
+import { useAuth } from '../../context/AuthContext';
 import { ACHIEVEMENTS, LEVELS } from '../../data/achievements';
 import { COMMANDS } from '../../data/commands';
 import Header from '../../components/Common/Header';
@@ -23,26 +24,36 @@ import Card from '../../components/Common/Card';
 import Badge, { AchievementCard } from '../../components/Badge/Badge';
 import Button from '../../components/Common/Button';
 import { GameIcon } from '../../utils/icons';
+import { useResponsive, clickable } from '../../utils/responsive';
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { 
-    xp, 
-    gold, 
-    level, 
-    unlockedAchievements, 
-    uniqueCommandsUsed, 
+  const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
+  const {
+    xp,
+    gold,
+    level,
+    unlockedAchievements,
+    uniqueCommandsUsed,
     totalPlayTime,
     soundEnabled,
     hintsEnabled,
     updateSettings,
     resetPlayer,
   } = usePlayer();
-  const { 
-    completedQuests, 
-    unlockedZones, 
-    resetGameProgress 
+  const {
+    completedQuests,
+    unlockedZones,
+    resetGameProgress
   } = useGame();
+  const {
+    currentUser,
+    users,
+    logout,
+    switchUser,
+    deleteAccount,
+    updateProfile,
+  } = useAuth();
 
   const [activeTab, setActiveTab] = useState('stats');
 
@@ -55,8 +66,8 @@ const ProfileScreen = ({ navigation }) => {
   const currentLevelXP = level?.xpRequired || 0;
   const nextLevelData = LEVELS.find(l => l.level === levelNum + 1);
   const nextLevelXP = nextLevelData?.xpRequired || currentLevelXP;
-  const xpProgress = nextLevelXP > currentLevelXP 
-    ? ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100 
+  const xpProgress = nextLevelXP > currentLevelXP
+    ? ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100
     : 100;
 
   // Alias for cleaner code
@@ -64,7 +75,7 @@ const ProfileScreen = ({ navigation }) => {
   const learnedCommands = uniqueCommandsUsed || [];
 
   // Get all achievements with unlock status
-  const allAchievements = Object.values(ACHIEVEMENTS).map(cat => 
+  const allAchievements = Object.values(ACHIEVEMENTS).map(cat =>
     Object.values(cat).map(ach => ({
       ...ach,
       unlocked: achievements.includes(ach.id),
@@ -88,18 +99,18 @@ const ProfileScreen = ({ navigation }) => {
       'Are you sure you want to reset ALL your progress? This cannot be undone!',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Reset', 
-          style: 'destructive', 
+        {
+          text: 'Reset',
+          style: 'destructive',
           onPress: () => {
             Alert.alert(
               'Final Confirmation',
               'This will delete all XP, gold, achievements, and quest progress!',
               [
                 { text: 'Keep My Progress', style: 'cancel' },
-                { 
-                  text: 'Delete Everything', 
-                  style: 'destructive', 
+                {
+                  text: 'Delete Everything',
+                  style: 'destructive',
                   onPress: () => {
                     resetPlayer();
                     resetGameProgress();
@@ -114,8 +125,91 @@ const ProfileScreen = ({ navigation }) => {
     );
   };
 
+  // Handle logout
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', onPress: () => logout() },
+      ]
+    );
+  };
+
+  // Handle switch user
+  const handleSwitchUser = async (userId) => {
+    try {
+      await switchUser(userId);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Failed to switch user');
+    }
+  };
+
+  // Handle delete account
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and ALL game progress. This cannot be undone!',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Final Confirmation',
+              `Delete account "${currentUser?.displayName || currentUser?.username}"? You will be logged out.`,
+              [
+                { text: 'Keep Account', style: 'cancel' },
+                {
+                  text: 'Delete Forever',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await deleteAccount(currentUser.id);
+                    } catch (e) {
+                      Alert.alert('Error', e.message || 'Failed to delete account');
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const otherUsers = users.filter(u => u.id !== currentUser?.id);
+
   const renderStatsTab = () => (
     <View>
+      {/* User Info Card */}
+      <Card style={styles.userCard}>
+        <View style={styles.userHeader}>
+          <View style={styles.userAvatar}>
+            <Text style={styles.userAvatarText}>{currentUser?.avatar || '🧙'}</Text>
+          </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{currentUser?.displayName || 'Adventurer'}</Text>
+            <Text style={styles.userUsername}>@{currentUser?.username || 'unknown'}</Text>
+            {currentUser?.isGuest && (
+              <View style={styles.guestBadge}>
+                <Text style={styles.guestBadgeText}>Guest</Text>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity
+            style={[styles.logoutButton, clickable()]}
+            onPress={handleLogout}
+          >
+            <GameIcon name="arrow" size={16} color={COLORS.error} />
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </Card>
+
       {/* Level Card */}
       <Card style={styles.levelCard}>
         <View style={styles.levelHeader}>
@@ -141,22 +235,22 @@ const ProfileScreen = ({ navigation }) => {
 
       {/* Stats Grid */}
       <View style={styles.statsGrid}>
-        <Card style={styles.statCard}>
+        <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="challenge" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{completedQuests.length}</Text>
           <Text style={styles.statLabel}>Quests</Text>
         </Card>
-        <Card style={styles.statCard}>
+        <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="map" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{unlockedZones.length}</Text>
           <Text style={styles.statLabel}>Zones</Text>
         </Card>
-        <Card style={styles.statCard}>
+        <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="achievement" size={24} color={COLORS.gold} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{unlockedCount}</Text>
           <Text style={styles.statLabel}>Badges</Text>
         </Card>
-        <Card style={styles.statCard}>
+        <Card style={[styles.statCard, isDesktop && { width: '23%' }, isTablet && { width: '23%' }]}>
           <GameIcon name="keyboard" size={24} color={COLORS.primary} style={{ marginBottom: SPACING.xs }} />
           <Text style={styles.statValue}>{learnedCommands.length}</Text>
           <Text style={styles.statLabel}>Commands</Text>
@@ -175,11 +269,11 @@ const ProfileScreen = ({ navigation }) => {
           </Text>
         </View>
         <View style={styles.progressBar}>
-          <View 
+          <View
             style={[
-              styles.progressFill, 
+              styles.progressFill,
               { width: `${(learnedCommands.length / Object.keys(COMMANDS).length) * 100}%` }
-            ]} 
+            ]}
           />
         </View>
         <View style={styles.commandTags}>
@@ -218,11 +312,11 @@ const ProfileScreen = ({ navigation }) => {
           {unlockedCount} / {totalAchievements} Unlocked
         </Text>
         <View style={styles.progressBar}>
-          <View 
+          <View
             style={[
-              styles.progressFill, 
+              styles.progressFill,
               { width: `${(unlockedCount / totalAchievements) * 100}%` }
-            ]} 
+            ]}
           />
         </View>
       </Card>
@@ -247,10 +341,33 @@ const ProfileScreen = ({ navigation }) => {
 
   const renderSettingsTab = () => (
     <View>
+      {/* Switch User Section */}
+      {otherUsers.length > 0 && (
+        <Card style={styles.settingsCard}>
+          <Text style={styles.cardTitle}><GameIcon name="profile" size={16} color={COLORS.primary} /> Switch User</Text>
+          {otherUsers.map(user => (
+            <TouchableOpacity
+              key={user.id}
+              style={[styles.switchUserRow, clickable()]}
+              onPress={() => handleSwitchUser(user.id)}
+            >
+              <View style={styles.switchUserAvatar}>
+                <Text style={styles.switchUserAvatarText}>{user.avatar || '🧙'}</Text>
+              </View>
+              <View style={styles.switchUserInfo}>
+                <Text style={styles.switchUserName}>{user.displayName}</Text>
+                <Text style={styles.switchUserUsername}>@{user.username}{user.isGuest ? ' (Guest)' : ''}</Text>
+              </View>
+              <GameIcon name="arrow" size={16} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          ))}
+        </Card>
+      )}
+
       {/* Preferences */}
       <Card style={styles.settingsCard}>
         <Text style={styles.cardTitle}><GameIcon name="settings" size={16} color={COLORS.textSecondary} /> Preferences</Text>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <GameIcon name="sound" size={18} color={COLORS.primary} />
@@ -278,6 +395,19 @@ const ProfileScreen = ({ navigation }) => {
         </View>
       </Card>
 
+      {/* Account Actions */}
+      <Card style={styles.settingsCard}>
+        <Text style={styles.cardTitle}><GameIcon name="profile" size={16} color={COLORS.textSecondary} /> Account</Text>
+
+        <TouchableOpacity
+          style={[styles.accountAction, clickable()]}
+          onPress={handleLogout}
+        >
+          <GameIcon name="arrow" size={18} color={COLORS.textSecondary} />
+          <Text style={styles.accountActionText}>Logout</Text>
+        </TouchableOpacity>
+      </Card>
+
       {/* About */}
       <Card style={styles.settingsCard}>
         <Text style={styles.cardTitle}><GameIcon name="terminal" size={16} color={COLORS.textSecondary} /> About</Text>
@@ -302,6 +432,15 @@ const ProfileScreen = ({ navigation }) => {
           onPress={handleResetProgress}
           variant="danger"
         />
+        <View style={{ height: SPACING.md }} />
+        <Text style={styles.dangerText}>
+          Permanently delete your account and all associated data.
+        </Text>
+        <Button
+          title="Delete Account"
+          onPress={handleDeleteAccount}
+          variant="danger"
+        />
       </Card>
     </View>
   );
@@ -311,7 +450,7 @@ const ProfileScreen = ({ navigation }) => {
       {/* Header */}
       <Header
         title="Profile"
-        subtitle={levelTitle}
+        subtitle={currentUser?.displayName || levelTitle}
       />
 
       {/* Tab Bar */}
@@ -323,7 +462,7 @@ const ProfileScreen = ({ navigation }) => {
         ].map(tab => (
           <TouchableOpacity
             key={tab.key}
-            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+            style={[styles.tab, activeTab === tab.key && styles.activeTab, clickable()]}
             onPress={() => setActiveTab(tab.key)}
           >
             <GameIcon name={tab.iconName} size={16} color={activeTab === tab.key ? COLORS.primary : COLORS.textSecondary} />
@@ -335,13 +474,15 @@ const ProfileScreen = ({ navigation }) => {
       </View>
 
       {/* Content */}
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ maxWidth: maxContentWidth, alignSelf: 'center', width: '100%', paddingHorizontal: layout.contentPadding }}
       >
         {activeTab === 'stats' && renderStatsTab()}
         {activeTab === 'achievements' && renderAchievementsTab()}
         {activeTab === 'settings' && renderSettingsTab()}
+        <View style={{ height: SPACING.xxxl }} />
       </ScrollView>
     </View>
   );
@@ -370,9 +511,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: COLORS.primary,
   },
-  tabIcon: {
-    fontSize: FONTS.sizes.md,
-  },
   tabLabel: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
@@ -385,6 +523,71 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: SPACING.md,
   },
+  // User card
+  userCard: {
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  userHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+  },
+  userAvatarText: {
+    fontSize: 28,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.lg,
+    fontWeight: FONTS.weights.bold,
+  },
+  userUsername: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.sm,
+  },
+  guestBadge: {
+    backgroundColor: COLORS.warning + '30',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.sm,
+    alignSelf: 'flex-start',
+    marginTop: SPACING.xs,
+  },
+  guestBadgeText: {
+    color: COLORS.warning,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: FONTS.weights.bold,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.error + '15',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.error + '30',
+  },
+  logoutButtonText: {
+    color: COLORS.error,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights.medium,
+  },
+  // Level card
   levelCard: {
     padding: SPACING.lg,
     marginBottom: SPACING.md,
@@ -428,10 +631,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.md,
   },
-  goldIcon: {
-    fontSize: FONTS.sizes.md,
-    marginRight: SPACING.xs,
-  },
   goldAmount: {
     color: COLORS.gold,
     fontSize: FONTS.sizes.md,
@@ -464,10 +663,6 @@ const styles = StyleSheet.create({
     width: '48%',
     padding: SPACING.md,
     alignItems: 'center',
-  },
-  statIcon: {
-    fontSize: 24,
-    marginBottom: SPACING.xs,
   },
   statValue: {
     color: COLORS.textPrimary,
@@ -542,9 +737,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.md,
   },
-  timeIcon: {
-    fontSize: 28,
-  },
   timeLabel: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
@@ -575,6 +767,52 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     paddingLeft: SPACING.sm,
   },
+  // Switch user
+  switchUserRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surfaceLight,
+  },
+  switchUserAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  switchUserAvatarText: {
+    fontSize: 20,
+  },
+  switchUserInfo: {
+    flex: 1,
+  },
+  switchUserName: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.md,
+    fontWeight: FONTS.weights.medium,
+  },
+  switchUserUsername: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+  },
+  // Account actions
+  accountAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surfaceLight,
+  },
+  accountActionText: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.md,
+  },
+  // Settings
   settingsCard: {
     padding: SPACING.md,
     marginBottom: SPACING.md,
@@ -591,9 +829,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-  },
-  settingIcon: {
-    fontSize: FONTS.sizes.lg,
   },
   settingLabel: {
     color: COLORS.textPrimary,

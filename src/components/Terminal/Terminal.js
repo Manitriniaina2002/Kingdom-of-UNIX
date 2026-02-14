@@ -17,6 +17,7 @@ import {
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { useTerminal } from '../../context/TerminalContext';
 import { usePlayer } from '../../context/PlayerContext';
+import { useResponsive } from '../../utils/responsive';
 
 const Terminal = ({ 
   onCommandExecuted, 
@@ -38,7 +39,8 @@ const Terminal = ({
   const { recordCommand } = usePlayer();
   const scrollViewRef = useRef(null);
   const inputRef = useRef(null);
-  
+  const { fonts: rFonts } = useResponsive();
+
   // Auto-scroll to bottom when history changes
   useEffect(() => {
     if (scrollViewRef.current) {

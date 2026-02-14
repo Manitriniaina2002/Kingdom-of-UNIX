@@ -20,6 +20,7 @@ import Header from '../../components/Common/Header';
 import Terminal from '../../components/Terminal/Terminal';
 import Card from '../../components/Common/Card';
 import { GameIcon } from '../../utils/icons';
+import { useResponsive, clickable } from '../../utils/responsive';
 
 const PracticeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -29,6 +30,7 @@ const PracticeScreen = ({ navigation }) => {
   
   const [selectedCommand, setSelectedCommand] = useState(null);
   const [showCommandRef, setShowCommandRef] = useState(false);
+  const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
 
   // Initialize practice filesystem
   useEffect(() => {
@@ -40,11 +42,13 @@ const PracticeScreen = ({ navigation }) => {
 
   // Group commands by category
   const commandCategories = {
-    'Navigation': ['pwd', 'ls', 'cd'],
-    'File Operations': ['cat', 'mkdir', 'rm', 'tree'],
-    'System': ['ps', 'top', 'kill', 'whoami'],
-    'Text': ['grep', 'echo'],
-    'Permissions': ['chmod', 'chown'],
+    'Navigation': ['pwd', 'ls', 'cd', 'find', 'tree'],
+    'File Operations': ['cat', 'touch', 'cp', 'mv', 'mkdir', 'rm', 'head', 'tail', 'less', 'stat'],
+    'Text Processing': ['grep', 'echo', 'sort', 'uniq', 'wc', 'cut', 'sed', 'awk', 'tr', 'tee', 'xargs'],
+    'Permissions': ['chmod', 'chown', 'chgrp', 'umask'],
+    'Processes': ['ps', 'top', 'kill', 'killall', 'bg', 'fg', 'jobs', 'nohup'],
+    'Networking': ['ping', 'hostname', 'curl', 'wget', 'ssh', 'scp', 'netstat'],
+    'System Admin': ['whoami', 'sudo', 'df', 'du', 'free', 'uptime', 'man'],
     'Utility': ['clear', 'help'],
   };
 
@@ -83,7 +87,7 @@ const PracticeScreen = ({ navigation }) => {
       <View style={styles.terminalSection}>
         <Terminal
           onCommandExecuted={handleCommandExecuted}
-          height={300}
+          height={layout.terminalHeight}
           questMode={false}
           placeholder="Try any command..."
         />

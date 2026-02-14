@@ -19,6 +19,7 @@ import Header from '../../components/Common/Header';
 import QuestCard from '../../components/Quest/QuestCard';
 import DialogBox from '../../components/Dialog/DialogBox';
 import { GameIcon } from '../../utils/icons';
+import { useResponsive, clickable } from '../../utils/responsive';
 
 const ZoneScreen = ({ route, navigation }) => {
   const { zoneId } = route.params;
@@ -29,6 +30,7 @@ const ZoneScreen = ({ route, navigation }) => {
   const zone = ZONES[zoneId];
   const zoneQuests = zone?.quests.map(qId => QUESTS[qId]).filter(Boolean) || [];
   const progress = getZoneProgress(zoneId);
+  const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
 
   useEffect(() => {
     if (zone) {
@@ -70,8 +72,9 @@ const ZoneScreen = ({ route, navigation }) => {
         rightIcon=""
       />
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={{ maxWidth: maxContentWidth, alignSelf: 'center', width: '100%', padding: layout.contentPadding }}
         showsVerticalScrollIndicator={false}
       >
         {/* Zone Header Card */}

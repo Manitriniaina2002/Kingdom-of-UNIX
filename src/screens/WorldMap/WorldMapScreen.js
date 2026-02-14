@@ -9,9 +9,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useResponsive, clickable } from '../../utils/responsive';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useGame } from '../../context/GameContext';
 import { ZONES, ZONE_ORDER, WORLD_CONNECTIONS } from '../../data/zones';
@@ -19,12 +19,11 @@ import Header from '../../components/Common/Header';
 import ZoneNode from '../../components/Zone/ZoneNode';
 import { GameIcon } from '../../utils/icons';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 const WorldMapScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { unlockedZones, getZoneProgress, completedQuests } = useGame();
   const [selectedZone, setSelectedZone] = useState(null);
+  const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
 
   const handleZonePress = (zoneId) => {
     if (unlockedZones.includes(zoneId)) {
@@ -69,7 +68,7 @@ const WorldMapScreen = ({ navigation }) => {
       {/* Map Area */}
       <ScrollView 
         style={styles.mapContainer}
-        contentContainerStyle={styles.mapContent}
+        contentContainerStyle={[styles.mapContent, { maxWidth: maxContentWidth, alignSelf: 'center', width: '100%' }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Connection Lines (simplified) */}
@@ -166,6 +165,7 @@ const WorldMapScreen = ({ navigation }) => {
                 style={[
                   styles.zoneListItem,
                   !isUnlocked && styles.zoneListItemLocked,
+                  clickable(),
                 ]}
                 onPress={() => handleZonePress(zoneId)}
                 disabled={!isUnlocked}
