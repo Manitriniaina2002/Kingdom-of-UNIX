@@ -14,7 +14,7 @@ const initialState = {
   history: [
     {
       type: 'system',
-      content: 'Welcome to the Kingdom of UNIX Terminal!',
+      content: 'Welcome to the UNIX Kingdom Terminal!',
       timestamp: Date.now(),
     },
     {

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Kingdom-of-UNIX",
-    "slug": "kingdom-of-unix",
+    "name": "UNIX Kingdom",
+    "slug": "unix-kingdom",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,21 +16,21 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kingdomofunix.app"
+      "bundleIdentifier": "com.unixkingdom.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D1117"
       },
-      "package": "com.kingdomofunix.app",
+      "package": "com.unixkingdom.app",
       "versionCode": 1
     },
     "web": {},
-    "scheme": "kingdomofunix",
+    "scheme": "unixkingdom",
     "extra": {
       "eas": {
-        "projectId": "kingdom-of-unix"
+        "projectId": "unix-kingdom"
       }
     }
   }

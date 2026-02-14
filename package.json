@@ -1,5 +1,5 @@
 {
-  "name": "kingdom-of-unix",
+  "name": "unix-kingdom",
   "version": "1.0.0",
   "description": "A game-based learning platform to teach UNIX concepts through an interactive fantasy adventure",
   "main": "node_modules/expo/AppEntry.js",

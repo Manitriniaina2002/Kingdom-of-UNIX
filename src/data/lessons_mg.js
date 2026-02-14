@@ -1,5 +1,5 @@
 /**
- * Lesona UNIX amin'ny teny Malagasy – Kingdom of UNIX
+ * Lesona UNIX amin'ny teny Malagasy – UNIX Kingdom
  * 10 toko, 30 lesona manaraka ny UNIX hatramin'ny fototra ka hatramin'ny fitantanana
  */
 

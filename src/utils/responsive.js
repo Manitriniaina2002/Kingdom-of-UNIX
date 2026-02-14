@@ -1,5 +1,5 @@
 /**
- * Responsive Design Utilities for Kingdom of UNIX
+ * Responsive Design Utilities for UNIX Kingdom
  * Provides hooks and helpers for adaptive layouts across all device sizes
  */
 

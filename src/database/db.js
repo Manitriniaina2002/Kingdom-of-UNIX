@@ -1,5 +1,5 @@
 /**
- * SQLite Database Module - Persistence layer for Kingdom of UNIX
+ * SQLite Database Module - Persistence layer for UNIX Kingdom
  * Uses expo-sqlite (v14) with async API on native platforms.
  * Falls back to a localStorage-based adapter on web.
  * Supports multi-user accounts and lesson progress tracking

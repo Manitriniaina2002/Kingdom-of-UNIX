@@ -1,10 +1,10 @@
 /**
- * French translations – Kingdom of UNIX
+ * French translations – UNIX Kingdom
  */
 export default {
   // ── Common ──
   common: {
-    appTitle: 'Royaume d\'UNIX',
+    appTitle: 'Royaume UNIX',
     loading: 'Chargement...',
     cancel: 'Annuler',
     error: 'Erreur',
@@ -84,7 +84,7 @@ export default {
     overallProgress: 'Progression globale',
     questsCompletedLabel: 'Quêtes terminées',
     zonesUnlocked: 'Zones débloquées',
-    welcomeMsg1: 'Salutations, jeune voyageur ! Bienvenue dans le Royaume d\'UNIX !',
+    welcomeMsg1: 'Salutations, jeune voyageur ! Bienvenue dans le Royaume UNIX !',
     welcomeMsg2: 'Je suis Manitriniaina, votre guide dans ce voyage magique dans le monde des ordinateurs.',
     welcomeMsg3: 'Ici, vous apprendrez l\'art ancien de la Ligne de Commande à travers des quêtes et des aventures !',
     welcomeMsg4: 'Ne vous inquiétez pas si vous n\'avez jamais utilisé un terminal - nous commençons par le tout début !',

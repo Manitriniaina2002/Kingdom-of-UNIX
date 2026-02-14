@@ -1,4 +1,4 @@
-# 🏰 Kingdom of UNIX
+# 🏰 UNIX Kingdom
 
 A game-based learning platform that teaches UNIX commands and IT fundamentals through an immersive fantasy adventure!
 
@@ -9,7 +9,7 @@ A game-based learning platform that teaches UNIX commands and IT fundamentals th
 
 ## 🎮 Overview
 
-**Kingdom of UNIX** transforms the learning experience of UNIX commands into an engaging role-playing adventure. Players journey through magical zones, complete quests, and battle bosses—all while mastering real terminal commands in a safe, sandboxed environment.
+**UNIX Kingdom** transforms the learning experience of UNIX commands into an engaging role-playing adventure. Players journey through magical zones, complete quests, and battle bosses—all while mastering real terminal commands in a safe, sandboxed environment.
 
 ### ✨ Key Features
 
@@ -161,7 +161,7 @@ Kingdom-of-UNIX/
 
 ## 🌐 Multilanguage Support
 
-Kingdom of UNIX supports **3 languages** out of the box:
+UNIX Kingdom supports **3 languages** out of the box:
 
 | Flag | Language | Code |
 | ---- | -------- | ---- |

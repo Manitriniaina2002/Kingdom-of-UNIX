@@ -208,7 +208,7 @@ function drawSplash(x, y, w, h) {
     return result;
   }
 
-  // Draw "Kingdom-of-UNIX" text area indicator (green bar below penguin)
+  // Draw "UNIX Kingdom" text area indicator (green bar below penguin)
   const textY = oy + penguinSize + 80;
   const textH = 8;
   const textW = 300;

@@ -1,5 +1,5 @@
 /**
- * Theme constants for Kingdom of UNIX
+ * Theme constants for UNIX Kingdom
  * Dark mode terminal aesthetic with fantasy accents
  */
 

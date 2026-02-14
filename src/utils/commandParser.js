@@ -537,7 +537,7 @@ function executeHelp(positionalArgs) {
     };
   }
   
-  const output = `Kingdom of UNIX - Command Help
+  const output = `UNIX Kingdom - Command Help
 
 [NAV] Navigation:
   pwd        Show current directory
@@ -762,13 +762,13 @@ function executeUnknown(command) {
   
   // Special easter eggs
   const easterEggs = {
-    'sudo': 'Nice try! In the Kingdom of UNIX, everyone is equal (mostly).',
+    'sudo': 'Nice try! In the UNIX Kingdom, everyone is equal (mostly).',,
     'rm -rf /': 'Whoa there! That would destroy the entire kingdom! Request denied.',
     'vim': 'Ah, the legendary editor! But this terminal is too humble for such power.',
     'emacs': 'A fine choice! But we keep things simple here in the village.',
     'exit': 'You can\'t exit the Kingdom that easily! You\'re on an adventure!',
     'hack': 'There\'s nothing to hack here - this is a learning environment!',
-    'hello': 'Hello, adventurer! Welcome to the Kingdom of UNIX!',
+    'hello': 'Hello, adventurer! Welcome to the UNIX Kingdom!',
     'hi': 'Hi there! Ready to learn some commands?',
   };
   

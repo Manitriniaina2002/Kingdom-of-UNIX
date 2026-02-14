@@ -1,10 +1,10 @@
 /**
- * English translations – Kingdom of UNIX
+ * English translations – UNIX Kingdom
  */
 export default {
   // ── Common ──
   common: {
-    appTitle: 'Kingdom of UNIX',
+    appTitle: 'UNIX Kingdom',
     loading: 'Loading...',
     cancel: 'Cancel',
     error: 'Error',
@@ -86,7 +86,7 @@ export default {
     questsCompletedLabel: 'Quests Completed',
     zonesUnlocked: 'Zones Unlocked',
     // Welcome dialog
-    welcomeMsg1: 'Greetings, young traveler! Welcome to the Kingdom of UNIX!',
+    welcomeMsg1: 'Greetings, young traveler! Welcome to the UNIX Kingdom!',
     welcomeMsg2: 'I am Manitriniaina, your guide on this magical journey into the world of computers.',
     welcomeMsg3: "Here, you'll learn the ancient art of the Command Line through quests and adventures!",
     welcomeMsg4: "Don't worry if you've never used a computer terminal before - we start from the very beginning!",

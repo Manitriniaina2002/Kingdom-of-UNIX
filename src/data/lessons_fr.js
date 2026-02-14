@@ -1,5 +1,5 @@
 /**
- * Leçons UNIX en Français – Kingdom of UNIX
+ * Leçons UNIX en Français – UNIX Kingdom
  * 10 chapitres, 30 leçons couvrant UNIX des bases à l'administration
  */
 

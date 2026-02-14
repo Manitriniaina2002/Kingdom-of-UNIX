@@ -1,5 +1,5 @@
 /**
- * Quest Data - All quests in the Kingdom of UNIX
+ * Quest Data - All quests in the UNIX Kingdom
  */
 
 export const QUESTS = {
@@ -1002,13 +1002,13 @@ export const QUESTS = {
     ],
     story: {
       intro: 'At the peak of the mountain, the Network Dragon awaits! It controls all connections and guards the summit. Use everything you\'ve learned across your entire journey!',
-      completion: 'THE NETWORK DRAGON FALLS! You have conquered the Kingdom of UNIX! From basic navigation to networking mastery, you are now a true UNIX champion! 🏆',
+      completion: 'THE NETWORK DRAGON FALLS! You have conquered the UNIX Kingdom! From basic navigation to networking mastery, you are now a true UNIX champion! 🏆',
     },
     badge: {
       id: 'badge_network_dragon',
       name: 'Kingdom Champion',
       icon: 'questBoss',
-      description: 'Defeated the Network Dragon and conquered the entire Kingdom of UNIX!',
+      description: 'Defeated the Network Dragon and conquered the entire UNIX Kingdom!',
     },
   },
 };

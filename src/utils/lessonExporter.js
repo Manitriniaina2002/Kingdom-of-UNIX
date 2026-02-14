@@ -13,9 +13,9 @@ const escapeHtml = (str) =>
 
 // Translated labels for PDF export
 const PDF_LABELS = {
-  en: { tip: 'Tip', warning: 'Warning', examples: 'Examples', exercises: 'Practice Exercises', hint: 'Hint', commands: 'Commands', none: 'None', courseTitle: 'Complete UNIX Command Line Course', generated: 'Generated from the Kingdom of UNIX app', share: 'Share', shareCourse: 'Share Kingdom of UNIX Course' },
-  fr: { tip: 'Astuce', warning: 'Attention', examples: 'Exemples', exercises: 'Exercices pratiques', hint: 'Indice', commands: 'Commandes', none: 'Aucune', courseTitle: 'Cours complet de la ligne de commande UNIX', generated: 'Généré depuis l\'application Kingdom of UNIX', share: 'Partager', shareCourse: 'Partager le cours Kingdom of UNIX' },
-  mg: { tip: 'Torohevitra', warning: 'Fampitandremana', examples: 'Ohatra', exercises: 'Fanazaran-tena', hint: 'Soso-kevitra', commands: 'Baiko', none: 'Tsy misy', courseTitle: 'Lesona feno amin\'ny baiko UNIX', generated: 'Noforonina avy amin\'ny application Kingdom of UNIX', share: 'Zaraina', shareCourse: 'Zaraina ny lesona Kingdom of UNIX' },
+  en: { tip: 'Tip', warning: 'Warning', examples: 'Examples', exercises: 'Practice Exercises', hint: 'Hint', commands: 'Commands', none: 'None', courseTitle: 'Complete UNIX Command Line Course', generated: 'Generated from the UNIX Kingdom app', share: 'Share', shareCourse: 'Share UNIX Kingdom Course' },
+  fr: { tip: 'Astuce', warning: 'Attention', examples: 'Exemples', exercises: 'Exercices pratiques', hint: 'Indice', commands: 'Commandes', none: 'Aucune', courseTitle: 'Cours complet de la ligne de commande UNIX', generated: 'Généré depuis l\'application UNIX Kingdom', share: 'Partager', shareCourse: 'Partager le cours UNIX Kingdom' },
+  mg: { tip: 'Torohevitra', warning: 'Fampitandremana', examples: 'Ohatra', exercises: 'Fanazaran-tena', hint: 'Soso-kevitra', commands: 'Baiko', none: 'Tsy misy', courseTitle: 'Lesona feno amin\'ny baiko UNIX', generated: 'Noforonina avy amin\'ny application UNIX Kingdom', share: 'Zaraina', shareCourse: 'Zaraina ny lesona UNIX Kingdom' },
 };
 
 function getLabels(lang) {
@@ -94,7 +94,7 @@ export function generateLessonHTML(lesson, chapterTitle = '', lang = 'en') {
 /**
  * Full HTML document template with dark theme styling
  */
-function wrapInDocument(bodyHtml, title = 'Kingdom of UNIX - Lessons') {
+function wrapInDocument(bodyHtml, title = 'UNIX Kingdom - Lessons') {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,7 +162,7 @@ export function generateAllLessonsHTML(chapters, allLessons, lang = 'en') {
   const labels = getLabels(lang);
   const coverHtml = `
     <div class="cover">
-      <h1>Kingdom of UNIX</h1>
+      <h1>UNIX Kingdom</h1>
       <p>${escapeHtml(labels.courseTitle)}</p>
       <p style="margin-top: 20px; color: #6E7681;">${escapeHtml(labels.generated)}</p>
     </div>
@@ -180,7 +180,7 @@ export function generateAllLessonsHTML(chapters, allLessons, lang = 'en') {
     return lessonsHtml;
   }).join('\n');
 
-  return wrapInDocument(coverHtml + chaptersHtml, 'Kingdom of UNIX - Complete Course');
+  return wrapInDocument(coverHtml + chaptersHtml, 'UNIX Kingdom - Complete Course');
 }
 
 /**
@@ -190,12 +190,12 @@ export async function downloadLesson(lesson, chapterTitle = '', lang = 'en') {
   const labels = getLabels(lang);
   const html = wrapInDocument(
     generateLessonHTML(lesson, chapterTitle, lang),
-    `Kingdom of UNIX - ${lesson.title}`
+    `UNIX Kingdom - ${lesson.title}`
   );
 
   const { uri } = await Print.printToFileAsync({ html });
 
-  const filename = `kingdom-unix-${lesson.id}.pdf`;
+  const filename = `unix-kingdom-${lesson.id}.pdf`;
   const newUri = FileSystem.documentDirectory + filename;
 
   await FileSystem.moveAsync({ from: uri, to: newUri });
@@ -219,7 +219,7 @@ export async function downloadAllLessons(chapters, allLessons, lang = 'en') {
 
   const { uri } = await Print.printToFileAsync({ html });
 
-  const filename = 'kingdom-unix-complete-course.pdf';
+  const filename = 'unix-kingdom-complete-course.pdf';
   const newUri = FileSystem.documentDirectory + filename;
 
   await FileSystem.moveAsync({ from: uri, to: newUri });

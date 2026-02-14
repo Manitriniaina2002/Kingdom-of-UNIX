@@ -1,6 +1,6 @@
 /**
  * Game Data - Zones, Quests, and World Structure
- * Kingdom of UNIX World Map Configuration
+ * UNIX Kingdom World Map Configuration
  */
 
 export const ZONES = {

@@ -34,7 +34,7 @@ export const createVirtualFilesystem = () => {
       permissions: '-rw-r--r--',
       owner: 'adventurer',
       group: 'adventurer',
-      content: `=== Welcome to the Kingdom of UNIX! ===
+      content: `=== Welcome to the UNIX Kingdom! ===
 
 You are an adventurer who has just arrived in our magical realm.
 Here, knowledge of the ancient UNIX commands will guide your path.

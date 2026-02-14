@@ -1,5 +1,5 @@
 /**
- * Kingdom of UNIX - Main Application Entry Point
+ * UNIX Kingdom - Main Application Entry Point
  * A game-based learning platform for UNIX concepts
  */
 

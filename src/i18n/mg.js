@@ -1,5 +1,5 @@
 /**
- * Malagasy translations – Kingdom of UNIX
+ * Malagasy translations – UNIX Kingdom
  */
 export default {
   // ── Common ──

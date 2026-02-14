@@ -1,5 +1,5 @@
 /**
- * UNIX Lessons - Comprehensive lesson content for Kingdom of UNIX
+ * UNIX Lessons - Comprehensive lesson content for UNIX Kingdom
  * 10 chapters, 30 lessons covering UNIX from basics to administration
  */
 
