@@ -62,14 +62,26 @@ export default function SignupScreen({ navigation }) {
     }
 
     setLoading(true);
+    
+    // Add a timeout to prevent infinite hanging
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError('Signup timed out. Please try again.');
+    }, 10000); // 10 second timeout
+
     try {
+      console.log('SignupScreen - attempting signup for:', username.trim());
       await signup(
         username.trim(),
         password,
         displayName.trim() || username.trim(),
         selectedAvatar
       );
+      console.log('SignupScreen - signup successful, navigation should happen automatically');
+      clearTimeout(timeoutId);
     } catch (e) {
+      console.error('SignupScreen - signup error:', e);
+      clearTimeout(timeoutId);
       setError(e.message || t('auth.signupFailed'));
     } finally {
       setLoading(false);

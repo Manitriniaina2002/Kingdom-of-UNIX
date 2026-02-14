@@ -6,6 +6,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 import en from './en';
 import fr from './fr';
 import mg from './mg';
@@ -21,6 +22,7 @@ export const LANGUAGES = [
 const LanguageContext = createContext();
 
 const STORAGE_KEY = 'kingdom_unix_lang';
+const LANG_FILE = (FileSystem.documentDirectory || '') + 'language.txt';
 
 // ── Persistence helpers ──
 
@@ -29,11 +31,12 @@ async function loadLanguage() {
     if (Platform.OS === 'web') {
       return localStorage.getItem(STORAGE_KEY) || 'en';
     }
-    // For native, use a simple approach with expo-secure-store or AsyncStorage
-    // Fallback to 'en'
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    const val = await AsyncStorage.getItem(STORAGE_KEY);
-    return val || 'en';
+    const info = await FileSystem.getInfoAsync(LANG_FILE);
+    if (info.exists) {
+      const val = await FileSystem.readAsStringAsync(LANG_FILE);
+      return val || 'en';
+    }
+    return 'en';
   } catch {
     return 'en';
   }
@@ -45,8 +48,7 @@ async function saveLanguage(lang) {
       localStorage.setItem(STORAGE_KEY, lang);
       return;
     }
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    await AsyncStorage.setItem(STORAGE_KEY, lang);
+    await FileSystem.writeAsStringAsync(LANG_FILE, lang);
   } catch {
     // silently ignore
   }

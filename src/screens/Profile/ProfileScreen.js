@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Switch,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +25,7 @@ import Button from '../../components/Common/Button';
 import { GameIcon } from '../../utils/icons';
 import { useResponsive, clickable } from '../../utils/responsive';
 import { useLanguage, LANGUAGES } from '../../i18n';
+import { useToast } from '../../components/Common/Toast';
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -58,6 +58,7 @@ const ProfileScreen = ({ navigation }) => {
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState('stats');
+  const { showToast, showConfirm } = useToast();
 
   // level is an object: { level: 1, title: 'Terminal Newbie', icon: '🌱', xpRequired: 0 }
   const levelNum = level?.level || 1;
@@ -95,92 +96,80 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   // Handle reset progress
-  const handleResetProgress = () => {
-    Alert.alert(
-      t('profile.resetProgress'),
-      t('profile.resetConfirmMsg'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('profile.reset'),
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              t('profile.finalConfirmation'),
-              t('profile.resetFinalMsg'),
-              [
-                { text: t('profile.keepProgress'), style: 'cancel' },
-                {
-                  text: t('profile.deleteEverything'),
-                  style: 'destructive',
-                  onPress: () => {
-                    resetPlayer();
-                    resetGameProgress();
-                    Alert.alert(t('profile.progressReset'), t('profile.progressResetMsg'));
-                  }
-                },
-              ]
-            );
-          }
-        },
-      ]
-    );
+  const handleResetProgress = async () => {
+    const confirmed = await showConfirm({
+      title: t('profile.resetProgress'),
+      message: t('profile.resetConfirmMsg'),
+      confirmText: t('profile.reset'),
+      cancelText: t('common.cancel'),
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    const finalConfirm = await showConfirm({
+      title: t('profile.finalConfirmation'),
+      message: t('profile.resetFinalMsg'),
+      confirmText: t('profile.deleteEverything'),
+      cancelText: t('profile.keepProgress'),
+      destructive: true,
+    });
+    if (!finalConfirm) return;
+
+    resetPlayer();
+    resetGameProgress();
+    showToast(t('profile.progressResetMsg'), 'success');
   };
 
   // Handle logout
-  const handleLogout = () => {
-    Alert.alert(
-      t('profile.logout'),
-      t('profile.logoutConfirmMsg'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('profile.logout'), onPress: () => logout() },
-      ]
-    );
+  const handleLogout = async () => {
+    const confirmed = await showConfirm({
+      title: t('profile.logoutTitle') || 'Logout',
+      message: t('profile.logoutConfirmMsg') || 'Are you sure you want to logout?',
+      confirmText: t('profile.logout') || 'Logout',
+      cancelText: t('common.cancel'),
+      destructive: false,
+    });
+    if (confirmed) {
+      logout();
+    }
   };
 
   // Handle switch user
   const handleSwitchUser = async (userId) => {
     try {
       await switchUser(userId);
+      showToast(t('profile.switchedUser') || 'User switched!', 'success');
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || t('profile.switchUserFailed'));
+      showToast(e.message || t('profile.switchUserFailed'), 'error');
     }
   };
 
   // Handle delete account
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      t('profile.deleteAccount'),
-      t('profile.deleteAccountConfirmMsg'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('profile.delete'),
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              t('profile.finalConfirmation'),
-              t('profile.deleteUserConfirm', { name: currentUser?.displayName || currentUser?.username }),
-              [
-                { text: t('profile.keepAccount'), style: 'cancel' },
-                {
-                  text: t('profile.deleteForever'),
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await deleteAccount(currentUser.id);
-                    } catch (e) {
-                      Alert.alert(t('common.error'), e.message || t('profile.deleteAccountFailed'));
-                    }
-                  },
-                },
-              ]
-            );
-          },
-        },
-      ]
-    );
+  const handleDeleteAccount = async () => {
+    const confirmed = await showConfirm({
+      title: t('profile.deleteAccount'),
+      message: t('profile.deleteAccountConfirmMsg'),
+      confirmText: t('profile.delete'),
+      cancelText: t('common.cancel'),
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    const finalConfirm = await showConfirm({
+      title: t('profile.finalConfirmation'),
+      message: t('profile.deleteUserConfirm', { name: currentUser?.displayName || currentUser?.username }),
+      confirmText: t('profile.deleteForever'),
+      cancelText: t('profile.keepAccount'),
+      destructive: true,
+    });
+    if (!finalConfirm) return;
+
+    try {
+      await deleteAccount(currentUser.id);
+      showToast(t('profile.accountDeleted') || 'Account deleted.', 'success');
+    } catch (e) {
+      showToast(e.message || t('profile.deleteAccountFailed'), 'error');
+    }
   };
 
   const otherUsers = users.filter(u => u.id !== currentUser?.id);

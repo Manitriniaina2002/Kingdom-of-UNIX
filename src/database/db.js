@@ -1,6 +1,6 @@
 /**
  * SQLite Database Module - Persistence layer for UNIX Kingdom
- * Uses expo-sqlite (v14) with async API on native platforms.
+ * Uses expo-sqlite legacy API for better standalone APK compatibility.
  * Falls back to a localStorage-based adapter on web.
  * Supports multi-user accounts and lesson progress tracking
  */
@@ -10,7 +10,7 @@ import { createWebDatabase } from './webDb';
 
 let SQLite = null;
 if (Platform.OS !== 'web') {
-  SQLite = require('expo-sqlite');
+  SQLite = require('expo-sqlite/legacy');
 }
 
 const DB_NAME = 'kingdom_unix.db';
@@ -26,7 +26,71 @@ export async function openDatabase() {
   if (Platform.OS === 'web') {
     _db = createWebDatabase();
   } else {
-    _db = await SQLite.openDatabaseAsync(DB_NAME);
+    // Use legacy API with db.exec() - bypasses WebSQL transactions which can hang
+    const db = SQLite.openDatabase(DB_NAME);
+    console.log('Database - SQLite database opened');
+
+    // Helper: normalize params - callers may pass (sql, [a,b]) or (sql, a, b)
+    const normalizeParams = (args) => {
+      if (args.length === 0) return [];
+      if (args.length === 1 && Array.isArray(args[0])) return args[0];
+      return args;
+    };
+
+    // Use db.exec() which is expo-sqlite's native batch execution method
+    // Much more reliable than the WebSQL transaction API
+    const execSql = (sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        db.exec([{ sql, args: params }], false, (error, results) => {
+          if (error) {
+            console.error('Database - exec error:', error);
+            reject(error);
+            return;
+          }
+          if (results && results[0]) {
+            if (results[0].error) {
+              console.error('Database - SQL error:', results[0].error);
+              reject(new Error(results[0].error.message || String(results[0].error)));
+              return;
+            }
+            resolve(results[0]);
+          } else {
+            resolve({ rows: [], rowsAffected: 0, insertId: undefined });
+          }
+        });
+      });
+    };
+
+    _db = {
+      execAsync: async (sql) => {
+        console.log('Database - execAsync called');
+        await execSql(sql);
+      },
+      runAsync: async (sql, ...args) => {
+        const params = normalizeParams(args);
+        console.log('Database - runAsync called, params:', params.length);
+        const result = await execSql(sql, params);
+        return {
+          lastInsertRowId: result.insertId,
+          changes: result.rowsAffected || 0,
+        };
+      },
+      getFirstAsync: async (sql, ...args) => {
+        const params = normalizeParams(args);
+        console.log('Database - getFirstAsync called');
+        const result = await execSql(sql, params);
+        if (result.rows && result.rows.length > 0) {
+          return result.rows[0];
+        }
+        return null;
+      },
+      getAllAsync: async (sql, ...args) => {
+        const params = normalizeParams(args);
+        console.log('Database - getAllAsync called');
+        const result = await execSql(sql, params);
+        return result.rows || [];
+      },
+    };
   }
 
   await migrate(_db);
@@ -43,131 +107,154 @@ export function getDB() {
 // ──────────────────────── MIGRATIONS ────────────────────────
 
 async function migrate(db) {
-  await db.execAsync(`
-    PRAGMA journal_mode = WAL;
-
-    CREATE TABLE IF NOT EXISTS users (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      username      TEXT    UNIQUE NOT NULL,
-      password_hash TEXT    NOT NULL,
-      display_name  TEXT    NOT NULL,
-      avatar        TEXT    DEFAULT '',
-      created_at    TEXT    DEFAULT (datetime('now')),
-      last_login    TEXT,
-      is_guest      INTEGER DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS player_profile (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id       INTEGER NOT NULL,
-      player_name   TEXT    NOT NULL DEFAULT 'ATRIKA',
-      avatar        TEXT    NOT NULL DEFAULT '',
-      created_at    TEXT,
-      xp            INTEGER NOT NULL DEFAULT 0,
-      gold          INTEGER NOT NULL DEFAULT 50,
-      total_commands_executed INTEGER NOT NULL DEFAULT 0,
-      sound_enabled INTEGER NOT NULL DEFAULT 1,
-      hints_enabled INTEGER NOT NULL DEFAULT 1,
-      current_streak INTEGER NOT NULL DEFAULT 0,
-      last_play_date TEXT,
-      total_play_time INTEGER NOT NULL DEFAULT 0,
-      UNIQUE(user_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS player_commands (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id     INTEGER NOT NULL,
-      command     TEXT    NOT NULL,
-      usage_count INTEGER NOT NULL DEFAULT 1,
-      UNIQUE(user_id, command)
-    );
-
-    CREATE TABLE IF NOT EXISTS player_achievements (
-      id             INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id        INTEGER NOT NULL,
-      achievement_id TEXT    NOT NULL,
-      unlocked_at    TEXT    NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, achievement_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS player_badges (
-      id        INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id   INTEGER NOT NULL,
-      badge_id  TEXT    NOT NULL,
-      earned_at TEXT    NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, badge_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS game_state (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id       INTEGER NOT NULL,
-      game_started  INTEGER NOT NULL DEFAULT 0,
-      UNIQUE(user_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS completed_quests (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id      INTEGER NOT NULL,
-      quest_id     TEXT    NOT NULL,
-      completed_at TEXT    NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, quest_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS unlocked_zones (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id     INTEGER NOT NULL,
-      zone_id     TEXT    NOT NULL,
-      unlocked_at TEXT    NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, zone_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS lesson_progress (
-      id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id            INTEGER NOT NULL,
-      lesson_id          TEXT    NOT NULL,
-      completed          INTEGER DEFAULT 0,
-      last_read_position INTEGER DEFAULT 0,
-      completed_at       TEXT,
-      UNIQUE(user_id, lesson_id)
-    );
-  `);
+  console.log('Database - starting migrations');
+  try {
+    // Execute each statement individually for legacy API compatibility
+    const statements = [
+      `PRAGMA journal_mode = WAL`,
+      
+      `CREATE TABLE IF NOT EXISTS users (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        username      TEXT    UNIQUE NOT NULL,
+        password_hash TEXT    NOT NULL,
+        display_name  TEXT    NOT NULL,
+        avatar        TEXT    DEFAULT '',
+        created_at    TEXT    DEFAULT (datetime('now')),
+        last_login    TEXT,
+        is_guest      INTEGER DEFAULT 0
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS player_profile (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id       INTEGER NOT NULL,
+        player_name   TEXT    NOT NULL DEFAULT 'ATRIKA',
+        avatar        TEXT    NOT NULL DEFAULT '',
+        created_at    TEXT,
+        xp            INTEGER NOT NULL DEFAULT 0,
+        gold          INTEGER NOT NULL DEFAULT 50,
+        total_commands_executed INTEGER NOT NULL DEFAULT 0,
+        sound_enabled INTEGER NOT NULL DEFAULT 1,
+        hints_enabled INTEGER NOT NULL DEFAULT 1,
+        current_streak INTEGER NOT NULL DEFAULT 0,
+        last_play_date TEXT,
+        total_play_time INTEGER NOT NULL DEFAULT 0,
+        UNIQUE(user_id)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS player_commands (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id     INTEGER NOT NULL,
+        command     TEXT    NOT NULL,
+        usage_count INTEGER NOT NULL DEFAULT 1,
+        UNIQUE(user_id, command)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS player_achievements (
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id        INTEGER NOT NULL,
+        achievement_id TEXT    NOT NULL,
+        unlocked_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(user_id, achievement_id)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS player_badges (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id   INTEGER NOT NULL,
+        badge_id  TEXT    NOT NULL,
+        earned_at TEXT    NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(user_id, badge_id)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS game_state (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id       INTEGER NOT NULL,
+        game_started  INTEGER NOT NULL DEFAULT 0,
+        UNIQUE(user_id)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS completed_quests (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id      INTEGER NOT NULL,
+        quest_id     TEXT    NOT NULL,
+        completed_at TEXT    NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(user_id, quest_id)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS unlocked_zones (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id     INTEGER NOT NULL,
+        zone_id     TEXT    NOT NULL,
+        unlocked_at TEXT    NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(user_id, zone_id)
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS lesson_progress (
+        id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id            INTEGER NOT NULL,
+        lesson_id          TEXT    NOT NULL,
+        completed          INTEGER DEFAULT 0,
+        last_read_position INTEGER DEFAULT 0,
+        completed_at       TEXT,
+        UNIQUE(user_id, lesson_id)
+      )`
+    ];
+    
+    // Execute each statement individually
+    for (let i = 0; i < statements.length; i++) {
+      console.log(`Database - executing migration ${i + 1}/${statements.length}`);
+      await db.runAsync(statements[i], []);
+    }
+    
+    console.log('Database - migrations completed successfully');
+  } catch (error) {
+    console.error('Database - migration error:', error);
+    throw error;
+  }
 }
 
 // ──────────────────────── USER MANAGEMENT QUERIES ────────────────────────
 
 /** Create a new user account */
 export async function createUser(db, username, passwordHash, displayName, avatar = '', isGuest = 0) {
-  const result = await db.runAsync(
-    `INSERT INTO users (username, password_hash, display_name, avatar, created_at, last_login, is_guest)
-     VALUES (?, ?, ?, ?, datetime('now'), datetime('now'), ?)`,
-    username,
-    passwordHash,
-    displayName,
-    avatar,
-    isGuest ? 1 : 0
-  );
-  const userId = result.lastInsertRowId;
+  console.log('Database - createUser called for username:', username);
+  try {
+    const result = await db.runAsync(
+      `INSERT INTO users (username, password_hash, display_name, avatar, created_at, last_login, is_guest)
+       VALUES (?, ?, ?, ?, datetime('now'), datetime('now'), ?)`,
+      username,
+      passwordHash,
+      displayName,
+      avatar,
+      isGuest ? 1 : 0
+    );
+    const userId = result.lastInsertRowId;
+    console.log('Database - user created with ID:', userId);
 
-  // Initialize player_profile for the new user
-  await db.runAsync(
-    `INSERT OR IGNORE INTO player_profile (user_id) VALUES (?)`,
-    userId
-  );
+    // Initialize player_profile for the new user
+    await db.runAsync(
+      `INSERT OR IGNORE INTO player_profile (user_id) VALUES (?)`,
+      userId
+    );
 
-  // Initialize game_state for the new user
-  await db.runAsync(
-    `INSERT OR IGNORE INTO game_state (user_id) VALUES (?)`,
-    userId
-  );
+    // Initialize game_state for the new user
+    await db.runAsync(
+      `INSERT OR IGNORE INTO game_state (user_id) VALUES (?)`,
+      userId
+    );
 
-  // Ensure 'village' is always unlocked by default for the new user
-  await db.runAsync(
-    `INSERT OR IGNORE INTO unlocked_zones (user_id, zone_id) VALUES (?, ?)`,
-    userId,
-    'village'
-  );
+    // Ensure 'village' is always unlocked by default for the new user
+    await db.runAsync(
+      `INSERT OR IGNORE INTO unlocked_zones (user_id, zone_id) VALUES (?, ?)`,
+      userId,
+      'village'
+    );
 
-  return userId;
+    console.log('Database - user initialization complete');
+    return userId;
+  } catch (error) {
+    console.error('Database - createUser error:', error);
+    throw error;
+  }
 }
 
 /** Get a user by username */
@@ -201,17 +288,20 @@ export async function updateUserLastLogin(db, userId) {
 
 /** Delete a user and all associated data */
 export async function deleteUser(db, userId) {
-  await db.execAsync(`
-    DELETE FROM player_commands WHERE user_id = ${userId};
-    DELETE FROM player_achievements WHERE user_id = ${userId};
-    DELETE FROM player_badges WHERE user_id = ${userId};
-    DELETE FROM completed_quests WHERE user_id = ${userId};
-    DELETE FROM unlocked_zones WHERE user_id = ${userId};
-    DELETE FROM lesson_progress WHERE user_id = ${userId};
-    DELETE FROM game_state WHERE user_id = ${userId};
-    DELETE FROM player_profile WHERE user_id = ${userId};
-    DELETE FROM users WHERE id = ${userId};
-  `);
+  const tables = [
+    'player_commands',
+    'player_achievements',
+    'player_badges',
+    'completed_quests',
+    'unlocked_zones',
+    'lesson_progress',
+    'game_state',
+    'player_profile',
+  ];
+  for (const table of tables) {
+    await db.runAsync(`DELETE FROM ${table} WHERE user_id = ?`, userId);
+  }
+  await db.runAsync(`DELETE FROM users WHERE id = ?`, userId);
 }
 
 // ──────────────────────── PLAYER QUERIES ────────────────────────

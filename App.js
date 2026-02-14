@@ -13,6 +13,7 @@ import { PlayerProvider } from './src/context/PlayerContext';
 import { TerminalProvider } from './src/context/TerminalContext';
 import { LessonProvider } from './src/context/LessonContext';
 import { LanguageProvider } from './src/i18n';
+import { ToastProvider } from './src/components/Common/Toast';
 import AppNavigator from './src/navigation/AppNavigator';
 import { COLORS } from './src/constants/theme';
 
@@ -21,17 +22,19 @@ const App = () => {
     <SafeAreaProvider>
       <StatusBar style="light" backgroundColor={COLORS.background} />
       <LanguageProvider>
-        <AuthProvider>
-          <GameProvider>
-            <PlayerProvider>
-              <TerminalProvider>
-                <LessonProvider>
-                  <AppNavigator />
-                </LessonProvider>
-              </TerminalProvider>
-            </PlayerProvider>
-          </GameProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <GameProvider>
+              <PlayerProvider>
+                <TerminalProvider>
+                  <LessonProvider>
+                    <AppNavigator />
+                  </LessonProvider>
+                </TerminalProvider>
+              </PlayerProvider>
+            </GameProvider>
+          </AuthProvider>
+        </ToastProvider>
       </LanguageProvider>
     </SafeAreaProvider>
   );

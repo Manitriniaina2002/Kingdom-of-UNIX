@@ -21,7 +21,7 @@ import {
   updateUserLastLogin,
   deleteUser,
 } from '../database/db';
-import * as Crypto from 'expo-crypto';
+import CryptoJS from 'crypto-js';
 
 const AuthContext = createContext();
 
@@ -95,14 +95,11 @@ function authReducer(state, action) {
 // ──────────────────────── HELPERS ────────────────────────
 
 /**
- * Hash a plain-text password using SHA-256 via expo-crypto.
+ * Hash a plain-text password using SHA-256 via crypto-js.
  * Returns the hex digest string.
  */
 async function hashPassword(password) {
-  return await Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    password,
-  );
+  return CryptoJS.SHA256(password).toString();
 }
 
 /**
@@ -139,12 +136,21 @@ export function AuthProvider({ children }) {
 
   // ── Initialize on mount ────────────────────────────────
   const initialize = useCallback(async () => {
+    // Set a timeout to ensure we always stop loading, even if initialization fails
+    const timeoutId = setTimeout(() => {
+      console.warn('AuthContext - initialization timeout after 5 seconds');
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+    }, 5000);
+
     try {
+      console.log('AuthContext - starting initialization');
       const db = await ensureDB();
+      console.log('AuthContext - database opened successfully');
 
       // Load every registered user
       const rows = await getAllUsers(db);
       const users = rows.map(mapUserRow);
+      console.log('AuthContext - loaded', users.length, 'users');
 
       dispatch({ type: ACTIONS.LOAD_USERS, payload: users });
 
@@ -160,6 +166,7 @@ export function AuthProvider({ children }) {
 
         // Only auto-login if the user actually has a lastLogin value
         if (mostRecent.lastLogin) {
+          console.log('AuthContext - auto-login user:', mostRecent.username);
           await updateUserLastLogin(db, mostRecent.id);
           const now = new Date().toISOString();
           dispatch({
@@ -168,8 +175,12 @@ export function AuthProvider({ children }) {
           });
         }
       }
+
+      console.log('AuthContext - initialization complete');
+      clearTimeout(timeoutId);
     } catch (error) {
       console.error('AuthContext – initialization error:', error);
+      clearTimeout(timeoutId);
     } finally {
       dispatch({ type: ACTIONS.SET_LOADING, payload: false });
     }
@@ -182,33 +193,45 @@ export function AuthProvider({ children }) {
   // ── Signup ─────────────────────────────────────────────
   const signup = useCallback(
     async (username, password, displayName, avatar = '') => {
-      const db = await ensureDB();
+      console.log('AuthContext - signup attempt for username:', username);
+      try {
+        const db = await ensureDB();
+        console.log('AuthContext - database ready for signup');
 
-      // Prevent duplicate usernames
-      const existing = await getUserByUsername(db, username);
-      if (existing) {
-        throw new Error('Username already taken');
+        // Prevent duplicate usernames
+        const existing = await getUserByUsername(db, username);
+        if (existing) {
+          console.log('AuthContext - username already exists');
+          throw new Error('Username already taken');
+        }
+
+        console.log('AuthContext - hashing password');
+        const passwordHash = await hashPassword(password);
+        const now = new Date().toISOString();
+
+        console.log('AuthContext - creating user in database');
+        const userId = await createUser(db, username, passwordHash, displayName || username, avatar, false);
+        console.log('AuthContext - user created with ID:', userId);
+
+        const newUser = {
+          id: userId,
+          username,
+          displayName: displayName || username,
+          avatar,
+          isGuest: false,
+          createdAt: now,
+          lastLogin: now,
+        };
+
+        dispatch({ type: ACTIONS.ADD_USER, payload: newUser });
+        dispatch({ type: ACTIONS.SET_CURRENT_USER, payload: newUser });
+
+        console.log('AuthContext - signup successful');
+        return newUser;
+      } catch (error) {
+        console.error('AuthContext - signup error:', error);
+        throw error;
       }
-
-      const passwordHash = await hashPassword(password);
-      const now = new Date().toISOString();
-
-      const userId = await createUser(db, username, passwordHash, displayName || username, avatar, false);
-
-      const newUser = {
-        id: userId,
-        username,
-        displayName: displayName || username,
-        avatar,
-        isGuest: false,
-        createdAt: now,
-        lastLogin: now,
-      };
-
-      dispatch({ type: ACTIONS.ADD_USER, payload: newUser });
-      dispatch({ type: ACTIONS.SET_CURRENT_USER, payload: newUser });
-
-      return newUser;
     },
     [ensureDB],
   );
@@ -235,13 +258,14 @@ export function AuthProvider({ children }) {
     dispatch({ type: ACTIONS.SET_CURRENT_USER, payload: user });
 
     // Also refresh the users list with the updated lastLogin
+    const allUsers = await getAllUsers(db);
     dispatch({
       type: ACTIONS.LOAD_USERS,
-      payload: state.users.map((u) => (u.id === user.id ? user : u)),
+      payload: allUsers.map(mapUserRow),
     });
 
     return user;
-  }, [state.users, ensureDB]);
+  }, [ensureDB]);
 
   // ── Login as Guest ─────────────────────────────────────
   const loginAsGuest = useCallback(async () => {

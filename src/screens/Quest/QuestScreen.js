@@ -9,8 +9,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
+import { useToast } from '../../components/Common/Toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useGame } from '../../context/GameContext';
@@ -155,6 +155,7 @@ const QuestScreen = ({ route, navigation }) => {
   }
 
   const alreadyCompleted = isQuestCompleted(questId);
+  const { showConfirm } = useToast();
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
@@ -163,18 +164,18 @@ const QuestScreen = ({ route, navigation }) => {
         title={quest.name}
         subtitle={zone?.name}
         showBack
-        onLeftPress={() => {
-          Alert.alert(
-            t('quest.leaveQuest'),
-            t('quest.leaveQuestMsg'),
-            [
-              { text: t('quest.stay'), style: 'cancel' },
-              { text: t('quest.leave'), style: 'destructive', onPress: () => {
-                resetTerminal();
-                navigation.goBack();
-              }},
-            ]
-          );
+        onLeftPress={async () => {
+          const confirmed = await showConfirm({
+            title: t('quest.leaveQuest'),
+            message: t('quest.leaveQuestMsg'),
+            confirmText: t('quest.leave'),
+            cancelText: t('quest.stay'),
+            destructive: true,
+          });
+          if (confirmed) {
+            resetTerminal();
+            navigation.goBack();
+          }
         }}
         rightIcon=""
       />
