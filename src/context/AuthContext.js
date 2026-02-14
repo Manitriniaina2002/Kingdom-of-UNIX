@@ -126,11 +126,21 @@ export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const dbRef = useRef(null);
 
+  /**
+   * Ensure the database is open. Returns the db handle.
+   * Safe to call multiple times – reuses the cached ref.
+   */
+  const ensureDB = useCallback(async () => {
+    if (dbRef.current) return dbRef.current;
+    const db = await openDatabase();
+    dbRef.current = db;
+    return db;
+  }, []);
+
   // ── Initialize on mount ────────────────────────────────
   const initialize = useCallback(async () => {
     try {
-      const db = await openDatabase();
-      dbRef.current = db;
+      const db = await ensureDB();
 
       // Load every registered user
       const rows = await getAllUsers(db);
@@ -163,7 +173,7 @@ export function AuthProvider({ children }) {
     } finally {
       dispatch({ type: ACTIONS.SET_LOADING, payload: false });
     }
-  }, []);
+  }, [ensureDB]);
 
   useEffect(() => {
     initialize();
@@ -172,8 +182,7 @@ export function AuthProvider({ children }) {
   // ── Signup ─────────────────────────────────────────────
   const signup = useCallback(
     async (username, password, displayName, avatar = '') => {
-      const db = dbRef.current;
-      if (!db) throw new Error('Database not initialised');
+      const db = await ensureDB();
 
       // Prevent duplicate usernames
       const existing = await getUserByUsername(db, username);
@@ -201,13 +210,12 @@ export function AuthProvider({ children }) {
 
       return newUser;
     },
-    [],
+    [ensureDB],
   );
 
   // ── Login ──────────────────────────────────────────────
   const login = useCallback(async (username, password) => {
-    const db = dbRef.current;
-    if (!db) throw new Error('Database not initialised');
+    const db = await ensureDB();
 
     const row = await getUserByUsername(db, username);
     if (!row) {
@@ -233,12 +241,11 @@ export function AuthProvider({ children }) {
     });
 
     return user;
-  }, [state.users]);
+  }, [state.users, ensureDB]);
 
   // ── Login as Guest ─────────────────────────────────────
   const loginAsGuest = useCallback(async () => {
-    const db = dbRef.current;
-    if (!db) throw new Error('Database not initialised');
+    const db = await ensureDB();
 
     // Generate a random 4-character hex suffix
     const randomSuffix = Math.floor(Math.random() * 0xFFFF)
@@ -264,7 +271,7 @@ export function AuthProvider({ children }) {
     dispatch({ type: ACTIONS.SET_CURRENT_USER, payload: guestUser });
 
     return guestUser;
-  }, []);
+  }, [ensureDB]);
 
   // ── Logout ─────────────────────────────────────────────
   const logout = useCallback(() => {
@@ -273,8 +280,7 @@ export function AuthProvider({ children }) {
 
   // ── Switch User ────────────────────────────────────────
   const switchUser = useCallback(async (userId) => {
-    const db = dbRef.current;
-    if (!db) throw new Error('Database not initialised');
+    const db = await ensureDB();
 
     const row = await getUserById(db, userId);
     if (!row) {
@@ -295,13 +301,12 @@ export function AuthProvider({ children }) {
     });
 
     return user;
-  }, [state.users]);
+  }, [state.users, ensureDB]);
 
   // ── Delete Account ─────────────────────────────────────
   const deleteAccount = useCallback(
     async (userId) => {
-      const db = dbRef.current;
-      if (!db) throw new Error('Database not initialised');
+      const db = await ensureDB();
 
       await deleteUser(db, userId);
 
@@ -312,14 +317,13 @@ export function AuthProvider({ children }) {
         dispatch({ type: ACTIONS.LOGOUT });
       }
     },
-    [state.currentUser],
+    [state.currentUser, ensureDB],
   );
 
   // ── Update Profile ─────────────────────────────────────
   const updateProfile = useCallback(
     async (displayName, avatar) => {
-      const db = dbRef.current;
-      if (!db) throw new Error('Database not initialised');
+      const db = await ensureDB();
       if (!state.currentUser) throw new Error('No user logged in');
 
       await db.runAsync(
@@ -347,7 +351,7 @@ export function AuthProvider({ children }) {
 
       return updatedUser;
     },
-    [state.currentUser, state.users],
+    [state.currentUser, state.users, ensureDB],
   );
 
   // ── Context value ──────────────────────────────────────

@@ -1,10 +1,17 @@
 /**
  * SQLite Database Module - Persistence layer for Kingdom of UNIX
- * Uses expo-sqlite (v14) with async API
+ * Uses expo-sqlite (v14) with async API on native platforms.
+ * Falls back to a localStorage-based adapter on web.
  * Supports multi-user accounts and lesson progress tracking
  */
 
-import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
+import { createWebDatabase } from './webDb';
+
+let SQLite = null;
+if (Platform.OS !== 'web') {
+  SQLite = require('expo-sqlite');
+}
 
 const DB_NAME = 'kingdom_unix.db';
 
@@ -15,7 +22,13 @@ let _db = null;
  */
 export async function openDatabase() {
   if (_db) return _db;
-  _db = await SQLite.openDatabaseAsync(DB_NAME);
+
+  if (Platform.OS === 'web') {
+    _db = createWebDatabase();
+  } else {
+    _db = await SQLite.openDatabaseAsync(DB_NAME);
+  }
+
   await migrate(_db);
   return _db;
 }
