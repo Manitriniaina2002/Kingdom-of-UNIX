@@ -762,7 +762,7 @@ function executeUnknown(command) {
   
   // Special easter eggs
   const easterEggs = {
-    'sudo': 'Nice try! In the UNIX Kingdom, everyone is equal (mostly).',,
+    'sudo': 'Nice try! In the UNIX Kingdom, everyone is equal (mostly).',
     'rm -rf /': 'Whoa there! That would destroy the entire kingdom! Request denied.',
     'vim': 'Ah, the legendary editor! But this terminal is too humble for such power.',
     'emacs': 'A fine choice! But we keep things simple here in the village.',
