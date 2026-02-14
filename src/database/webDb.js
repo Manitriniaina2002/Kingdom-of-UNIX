@@ -67,16 +67,51 @@ function _parseInsert(sql, params) {
   // INSERT INTO <table> (<cols>) VALUES (<placeholders>) [ON CONFLICT(...) DO UPDATE SET ...]
   // INSERT OR IGNORE INTO <table> ...
   const orIgnore = /INSERT\s+OR\s+IGNORE/i.test(sql);
-  const m = sql.match(
-    /INSERT\s+(?:OR\s+IGNORE\s+)?INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i,
+
+  // Match table and columns (columns never contain parens, so [^)]+ is fine)
+  const tableMatch = sql.match(
+    /INSERT\s+(?:OR\s+IGNORE\s+)?INTO\s+(\w+)\s*\(([^)]+)\)/i,
   );
-  if (!m) return null;
+  if (!tableMatch) return null;
 
-  const table = m[1];
-  const columns = m[2].split(',').map((c) => c.trim());
-  const placeholders = m[3].split(',').map((p) => p.trim());
+  const table = tableMatch[1];
+  const columns = tableMatch[2].split(',').map((c) => c.trim());
+
+  // Extract VALUES(...) content — may contain nested parens like datetime('now')
+  const valuesStart = sql.search(/VALUES\s*\(/i);
+  if (valuesStart === -1) return null;
+  const afterValues = sql.slice(valuesStart);
+  const parenStart = afterValues.indexOf('(');
+  let depth = 0;
+  let parenEnd = -1;
+  for (let i = parenStart; i < afterValues.length; i++) {
+    if (afterValues[i] === '(') depth++;
+    else if (afterValues[i] === ')') {
+      depth--;
+      if (depth === 0) { parenEnd = i; break; }
+    }
+  }
+  if (parenEnd === -1) return null;
+
+  const valuesContent = afterValues.slice(parenStart + 1, parenEnd);
+
+  // Split on commas that are not inside parentheses
+  const placeholders = [];
+  let current = '';
+  let parenDepth = 0;
+  for (const ch of valuesContent) {
+    if (ch === '(') parenDepth++;
+    else if (ch === ')') parenDepth--;
+    else if (ch === ',' && parenDepth === 0) {
+      placeholders.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) placeholders.push(current.trim());
+
   const values = {};
-
   let paramIdx = 0;
   columns.forEach((col, i) => {
     const ph = placeholders[i];
@@ -84,9 +119,11 @@ function _parseInsert(sql, params) {
       values[col] = params[paramIdx++];
     } else if (/datetime\s*\(\s*'now'\s*\)/i.test(ph)) {
       values[col] = _now();
-    } else {
+    } else if (ph != null) {
       // literal or default
       values[col] = ph.replace(/^'|'$/g, '');
+    } else {
+      values[col] = null;
     }
   });
 
