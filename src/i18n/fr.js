@@ -117,7 +117,7 @@ export default {
     about: 'À propos',
     version: 'Version',
     createdBy: 'Créé par',
-    teamName: 'Équipe Kingdom of UNIX',
+    teamName: 'RANDRIAMBOLOLONA Manitriniaina',
     dangerZone: 'Zone de danger',
     resetWarning: 'Réinitialiser votre progression supprimera tous les XP, or, succès et progrès de quêtes.',
     resetAllProgress: 'Réinitialiser la progression',

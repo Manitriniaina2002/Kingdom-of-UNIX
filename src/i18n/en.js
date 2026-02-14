@@ -119,7 +119,7 @@ export default {
     about: 'About',
     version: 'Version',
     createdBy: 'Created by',
-    teamName: 'Kingdom of UNIX Team',
+    teamName: 'RANDRIAMBOLOLONA Manitriniaina',
     dangerZone: 'Danger Zone',
     resetWarning: 'Resetting your progress will delete all XP, gold, achievements, and quest progress.',
     resetAllProgress: 'Reset All Progress',

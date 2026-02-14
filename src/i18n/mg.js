@@ -117,7 +117,7 @@ export default {
     about: 'Mombamomba',
     version: 'Kinova',
     createdBy: 'Noforonin\'ny',
-    teamName: 'Ekipan\'ny Kingdom of UNIX',
+    teamName: 'RANDRIAMBOLOLONA Manitriniaina',
     dangerZone: 'Faritra mampidi-doza',
     resetWarning: 'Ny famerenana ny fandrosoana dia hamafa ny XP, volamena, fahombiazana ary asa rehetra.',
     resetAllProgress: 'Famerenana ny fandrosoana',
