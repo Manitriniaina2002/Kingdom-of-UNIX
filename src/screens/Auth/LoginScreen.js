@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
@@ -76,6 +77,10 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
+  const handleExit = () => {
+    BackHandler.exitApp();
+  };
+
   const cardMaxWidth = isDesktop ? 480 : isTablet ? 440 : '100%';
 
   if (isLoading) {
@@ -102,6 +107,16 @@ export default function LoginScreen({ navigation }) {
         ]}
         keyboardShouldPersistTaps="handled"
       >
+        <View style={[styles.exitRow, { paddingTop: insets.top + spacing.sm }]}>
+          <TouchableOpacity
+            style={[styles.exitButton, clickable()]}
+            onPress={handleExit}
+            disabled={loading}
+          >
+            <Text style={[styles.exitText, { fontSize: fonts.sm }]}>Exit</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Header */}
         <View style={styles.headerSection}>
           <Text style={[styles.logo, { fontSize: fonts.title }]}>⚔️</Text>
@@ -228,6 +243,22 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  exitRow: {
+    alignItems: 'flex-end',
+    marginBottom: SPACING.md,
+  },
+  exitButton: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceLight,
+    backgroundColor: COLORS.surface,
+  },
+  exitText: {
+    color: COLORS.textSecondary,
+    fontWeight: FONTS.weights.medium,
   },
   headerSection: {
     alignItems: 'center',

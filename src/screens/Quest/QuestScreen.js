@@ -51,7 +51,7 @@ const QuestScreen = ({ route, navigation }) => {
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [questComplete, setQuestComplete] = useState(false);
-  const { layout, fonts, spacing } = useResponsive();
+  const { layout, fonts, spacing, isMiniPhone, isPhone } = useResponsive();
   const { t } = useLanguage();
 
   // Initialize quest
@@ -157,8 +157,14 @@ const QuestScreen = ({ route, navigation }) => {
   const alreadyCompleted = isQuestCompleted(questId);
   const { showConfirm } = useToast();
 
+  const terminalHeight = isMiniPhone ? 180 : isPhone ? 240 : layout.terminalHeight;
+
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xl + insets.bottom }]}
+        keyboardShouldPersistTaps="handled"
+      >
       {/* Header */}
       <Header
         title={quest.name}
@@ -243,7 +249,7 @@ const QuestScreen = ({ route, navigation }) => {
       <View style={styles.terminalContainer}>
         <Terminal
           onCommandExecuted={handleCommandExecuted}
-          height={layout.terminalHeight}
+          height={terminalHeight}
           questMode={true}
           placeholder={currentObjective ? t('quest.typeCommand', { cmd: currentObjective.command.split(' ')[0] }) : t('quest.typeACommand')}
         />
@@ -260,6 +266,7 @@ const QuestScreen = ({ route, navigation }) => {
           />
         </View>
       )}
+      </ScrollView>
 
       {/* Intro Dialog */}
       <DialogBox
@@ -408,6 +415,9 @@ const styles = StyleSheet.create({
   terminalContainer: {
     flex: 1,
     padding: SPACING.md,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   completeOverlay: {
     position: 'absolute',

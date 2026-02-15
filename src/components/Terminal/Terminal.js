@@ -39,7 +39,7 @@ const Terminal = ({
   const { recordCommand } = usePlayer();
   const scrollViewRef = useRef(null);
   const inputRef = useRef(null);
-  const { fonts: rFonts } = useResponsive();
+  const { fonts: rFonts, spacing: rSpacing, isMiniPhone } = useResponsive();
 
   // Auto-scroll to bottom when history changes
   useEffect(() => {
@@ -52,14 +52,16 @@ const Terminal = ({
 
   const handleSubmit = () => {
     if (!currentInput.trim() || isProcessing) return;
-    
+
     const command = currentInput.trim();
     const result = runCommand(command);
-    
+
     if (result) {
-      recordCommand(result.command);
+      recordCommand(command);
       onCommandExecuted?.(result);
     }
+
+    setInput('');
   };
 
   const handleKeyPress = (e) => {
@@ -94,7 +96,10 @@ const Terminal = ({
     };
 
     return (
-      <Text key={index} style={[styles.historyText, getStyle()]}>
+      <Text
+        key={index}
+        style={[styles.historyText, getStyle(), isMiniPhone && { fontSize: rFonts.sm, lineHeight: 18 }]}
+      >
         {item.content}
       </Text>
     );
@@ -110,13 +115,21 @@ const Terminal = ({
     return path;
   };
 
+  const smallInputStyles = isMiniPhone
+    ? {
+        fontSize: rFonts.sm,
+        paddingVertical: rSpacing.xs,
+        paddingHorizontal: rSpacing.sm,
+      }
+    : null;
+
   return (
     <KeyboardAvoidingView 
       style={[styles.container, { height }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Terminal Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, isMiniPhone && { paddingVertical: rSpacing.xs, paddingHorizontal: rSpacing.sm }]}>
         <View style={styles.headerDots}>
           <View style={[styles.dot, styles.dotRed]} />
           <View style={[styles.dot, styles.dotYellow]} />
@@ -131,7 +144,7 @@ const Terminal = ({
       {/* Terminal Output */}
       <ScrollView 
         ref={scrollViewRef}
-        style={styles.outputArea}
+        style={[styles.outputArea, isMiniPhone && { padding: rSpacing.sm }]}
         contentContainerStyle={styles.outputContent}
         showsVerticalScrollIndicator={true}
       >
@@ -141,7 +154,7 @@ const Terminal = ({
       {/* Input Area */}
       <View style={styles.inputArea}>
         {showPath && (
-          <Text style={styles.prompt}>
+          <Text style={[styles.prompt, isMiniPhone && { fontSize: rFonts.sm }]}>
             <Text style={styles.promptUser}>adventurer</Text>
             <Text style={styles.promptAt}>@</Text>
             <Text style={styles.promptHost}>kingdom</Text>
@@ -152,7 +165,7 @@ const Terminal = ({
         )}
         <TextInput
           ref={inputRef}
-          style={styles.input}
+          style={[styles.input, smallInputStyles]}
           value={currentInput}
           onChangeText={setInput}
           onSubmitEditing={handleSubmit}
@@ -167,11 +180,11 @@ const Terminal = ({
           editable={!isProcessing}
         />
         <TouchableOpacity 
-          style={[styles.submitButton, isProcessing && styles.submitButtonDisabled]}
+          style={[styles.submitButton, isProcessing && styles.submitButtonDisabled, isMiniPhone && { paddingVertical: rSpacing.xs, paddingHorizontal: rSpacing.sm }]}
           onPress={handleSubmit}
           disabled={isProcessing}
         >
-          <Text style={styles.submitButtonText}>⏎</Text>
+          <Text style={[styles.submitButtonText, isMiniPhone && { fontSize: rFonts.lg }]}>⏎</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
