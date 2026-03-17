@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 0,
     opacity: 0.35,
+    overflow: 'hidden',
   },
   blob: {
     position: 'absolute',

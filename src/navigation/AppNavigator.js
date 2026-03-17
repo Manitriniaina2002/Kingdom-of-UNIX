@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -195,7 +195,11 @@ const AppNavigator = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingLogo}>⚔️</Text>
+        <Image
+          source={require('../../assets/unix-kingdom-logo.png')}
+          style={styles.loadingLogo}
+          resizeMode="contain"
+        />
         <Text style={styles.loadingTitle}>{t('common.appTitle')}</Text>
       </View>
     );
@@ -235,7 +239,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingLogo: {
-    fontSize: 48,
+    width: 56,
+    height: 56,
     marginBottom: SPACING.md,
   },
   loadingTitle: {

@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -21,7 +22,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useResponsive, clickable } from '../../utils/responsive';
 import { useLanguage } from '../../i18n';
 
-const AVATARS = ['🧙', '🧝', '🧛', '🧚', '🦊', '🐉', '🦅', '🐺', '🌟', '⚔️', '🛡️', '🗡️'];
+const LOGO_AVATAR = '__UNIX_LOGO__';
+const AVATARS = ['🧙', '🧝', '🧛', '🧚', '🦊', '🐉', '🦅', '🐺', '🌟', LOGO_AVATAR, '🛡️', '🗡️'];
 
 export default function SignupScreen({ navigation }) {
   const { signup } = useAuth();
@@ -135,7 +137,15 @@ export default function SignupScreen({ navigation }) {
                 ]}
                 onPress={() => setSelectedAvatar(avatar)}
               >
-                <Text style={styles.avatarText}>{avatar}</Text>
+                {avatar === LOGO_AVATAR ? (
+                  <Image
+                    source={require('../../../assets/unix-kingdom-logo.png')}
+                    style={styles.avatarLogo}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>{avatar}</Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -286,6 +296,10 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 24,
+  },
+  avatarLogo: {
+    width: 28,
+    height: 28,
   },
   inputGroup: {
     marginBottom: SPACING.lg,

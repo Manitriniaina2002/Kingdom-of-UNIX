@@ -24,283 +24,239 @@ A game-based learning platform that teaches UNIX commands and IT fundamentals th
 - 👥 **Multi-User Accounts** — Login, signup, guest mode, and quick user switching
 - 📱 **Responsive Design** — Optimized for mobile, tablet, and desktop (web)
 
-## 🌍 Game Zones
+# UNIX Kingdom
 
-| Zone                         | Commands                 | Level |
-| ---------------------------- | ------------------------ | ----- |
-| 🏘️ **Village of Files**      | `pwd`, `ls`, `cd`, `cat` | 1+    |
-| 🦇 **Cave of Permissions**   | `chmod`, `chown`         | 5+    |
-| 🌲 **Forest of Processes**   | `ps`, `top`, `kill`      | 10+   |
-| 🏰 **Castle of Scripts**     | `grep`, `echo`, scripting | 15+  |
-| ⛰️ **Mountain of Networks**  | Networking concepts       | 20+  |
+A game-based learning platform that teaches UNIX commands through an immersive fantasy adventure.
 
-## 📱 Screenshots
+![Expo SDK](https://img.shields.io/badge/Expo%20SDK-51-blue)
+![React Native](https://img.shields.io/badge/React%20Native-0.74.5-61dafb)
+![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Web-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-```text
-┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│   🏰 Home       │  │   🗺️ Map        │  │   ⌨️ Terminal    │
-│                 │  │                 │  │                 │
-│  Welcome,       │  │  ┌───┐ ┌───┐   │  │  $ ls           │
-│  Adventurer!    │  │  │ 🏘️ │ │ 🦇 │   │  │  docs/          │
-│                 │  │  └───┘ └───┘   │  │  projects/      │
-│  Level 5        │  │  ┌───┐ ┌───┐   │  │  notes.txt      │
-│  ⭐ 1,250 XP    │  │  │ 🌲 │ │ 🏰 │   │  │                 │
-│  💰 45 Gold     │  │  └───┘ └───┘   │  │  $ _             │
-└─────────────────┘  └─────────────────┘  └─────────────────┘
-```
+## Overview
 
-## 🚀 Getting Started
+**UNIX Kingdom** transforms learning UNIX commands into an engaging role-playing game. Players journey through magical zones, complete quests, and battle bosses — all while mastering real terminal commands in a safe, sandboxed environment.
+
+### Key Features
+
+- **Interactive Terminal Simulator** — Practice real UNIX commands in a sandboxed virtual filesystem
+- **5 Themed Learning Zones** — Progressively unlock zones from basics to networking
+- **Quest-Based Learning** — Story-driven missions that teach commands in context
+- **XP, Levels & Achievements** — Gamified progression system
+- **Boss Battles** — Complex command puzzles at the end of each zone
+- **Structured Lessons** — Chapters with examples, code blocks, and exercises
+- **Command Reference** — Built-in help with explanations for every command
+- **Multilanguage Support** — English, French, and Malagasy
+- **Multi-User Accounts** — Login, signup, guest mode, quick user switching
+- **Responsive Design** — Mobile, tablet, and web (desktop)
+- **Offline-first** — All data stored locally via SQLite (Android) / localStorage (Web)
+
+## Game Zones
+
+| Zone | Commands | Level |
+| ---- | -------- | ----- |
+| Village of Files | `pwd`, `ls`, `cd`, `cat`, `mkdir`, `touch`, `cp`, `mv`, `rm` | 1+ |
+| Cave of Permissions | `chmod`, `chown`, `ls -la` | 5+ |
+| Forest of Processes | `ps`, `top`, `kill`, `bg`, `fg` | 10+ |
+| Castle of Scripts | `grep`, `echo`, `sed`, `awk`, scripting | 15+ |
+| Mountain of Networks | `ping`, `curl`, `netstat`, `ssh` | 20+ |
+
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Expo CLI (`npm install -g expo-cli`)
-- Expo Go app on your device (optional, for testing)
+- For Android builds: Android SDK + Java 17+
 
 ### Installation
 
-1. **Clone the repository**
+```bash
+git clone https://github.com/Manitriniaina2002/Kingdom-of-UNIX.git
+cd Kingdom-of-UNIX
+npm install
+```
 
-   ```bash
-   git clone https://github.com/Manitriniaina2002/Kingdom-of-UNIX.git
-   cd Kingdom-of-UNIX
-   ```
+### Run (Development)
 
-2. **Install dependencies**
+```bash
+# Start Metro + Expo dev server
+npx expo start --clear
 
-   ```bash
-   npm install
-   ```
+# Then press:
+#   a  →  Android emulator / connected device
+#   w  →  Web browser
+```
 
-3. **Start the development server**
+### Build APK (local)
 
-   ```bash
-   npm start
-   ```
+```bash
+# Generate native android/ folder
+npx expo prebuild --platform android
 
-4. **Run on device/emulator**
+# Build release APK
+cd android
+.\gradlew.bat assembleRelease          # Windows
+./gradlew assembleRelease              # macOS / Linux
+```
 
-   ```bash
-   # Scan QR code with Expo Go app, or:
+Output: `android/app/build/outputs/apk/release/Unix-Kingdom.apk`
 
-   # For Web
-   npm run web
+> **Tip (Windows):** If you hit Gradle lock timeouts, set a short-path `GRADLE_USER_HOME`:
+> ```powershell
+> $env:GRADLE_USER_HOME = "C:\Users\<you>\Kingdom-of-UNIX\.gradle-local"
+> ```
+> The `android/` directory is git-ignored (generated artifact).
 
-   # For iOS Simulator
-   npm run ios
+### Build APK (EAS cloud)
 
-   # For Android
-   npm run android
-   ```
+```bash
+npm install -g eas-cli
+eas login
+eas build --platform android --profile preview
+```
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 Kingdom-of-UNIX/
-├── App.js                        # Entry point with providers
-├── package.json                  # Dependencies
-├── src/
-│   ├── components/               # Reusable UI components
-│   │   ├── Badge/                # Achievement badges
-│   │   ├── Common/               # Button, Card, Header
-│   │   ├── Dialog/               # NPC dialog boxes
-│   │   ├── Player/               # Player stats bar
-│   │   ├── Quest/                # Quest cards
-│   │   ├── Terminal/             # Interactive terminal
-│   │   └── Zone/                 # Zone map nodes
-│   │
-│   ├── constants/
-│   │   └── theme.js              # Colors, fonts, spacing
-│   │
-│   ├── context/                  # State management (React Context)
-│   │   ├── AuthContext.js        # Authentication & user accounts
-│   │   ├── GameContext.js        # Zone/quest progress
-│   │   ├── LessonContext.js      # Lesson completion tracking
-│   │   ├── PlayerContext.js      # XP, achievements, settings
-│   │   └── TerminalContext.js    # Terminal state & history
-│   │
-│   ├── data/                     # Game content
-│   │   ├── achievements.js       # Badges & level definitions
-│   │   ├── commands.js           # UNIX command metadata
-│   │   ├── lessons.js            # Lesson chapters & content
-│   │   ├── quests.js             # Quest definitions
-│   │   └── zones.js              # Zone data & connections
-│   │
-│   ├── database/                 # Persistence layer
-│   │   ├── db.js                 # Database abstraction (SQLite / Web)
-│   │   └── webDb.js              # localStorage adapter for web
-│   │
-│   ├── i18n/                     # Multilanguage translations
-│   │   ├── index.js              # LanguageProvider & useLanguage hook
-│   │   ├── en.js                 # English
-│   │   ├── fr.js                 # French (Français)
-│   │   └── mg.js                 # Malagasy
-│   │
-│   ├── navigation/
-│   │   └── AppNavigator.js       # Stack & tab navigation
-│   │
-│   ├── screens/                  # Main app screens
-│   │   ├── Auth/                 # Login & Signup
-│   │   ├── Home/                 # Hub screen
-│   │   ├── Lessons/              # Lesson browser & reader
-│   │   ├── Practice/             # Sandbox terminal
-│   │   ├── Profile/              # Stats, badges, settings
-│   │   ├── Quest/                # Gameplay screen
-│   │   ├── WorldMap/             # Zone selection map
-│   │   └── Zone/                 # Zone details & quest list
-│   │
-│   └── utils/
-│       ├── commandParser.js      # Command execution engine
-│       ├── icons.js              # Game icon mapping
-│       ├── lessonExporter.js     # PDF export utility
-│       ├── responsive.js         # Responsive layout helpers
-│       └── virtualFilesystem.js  # Sandboxed filesystem
-│
-└── assets/                       # Images & static assets
+├── App.js                        # Entry point — providers + splash loader
+├── app.json                      # Expo config (icon, package name, EAS)
+├── eas.json                      # EAS build profiles
+├── assets/
+│   ├── unix-kingdom-logo.png     # App icon, splash & in-app logo
+│   └── me.png                    # Character image (dialog box)
+└── src/
+    ├── components/
+    │   ├── Common/               # AnimatedBackground, Button, Card,
+    │   │                         #   Header, Toast, UnixUniverseLoader
+    │   ├── Badge/                # Achievement badge display
+    │   ├── Dialog/               # NPC dialog boxes (typewriter effect)
+    │   ├── Player/               # PlayerStatsBar
+    │   ├── Quest/                # QuestCard
+    │   ├── Terminal/             # Interactive terminal component
+    │   └── Zone/                 # ZoneNode (world map node)
+    ├── constants/
+    │   └── theme.js              # Colors, fonts, spacing, shadows
+    ├── context/
+    │   ├── AuthContext.js        # Auth: login, signup, guest, multi-user
+    │   ├── GameContext.js        # Zone/quest progress (per user)
+    │   ├── LessonContext.js      # Lesson completion tracking
+    │   ├── PlayerContext.js      # XP, gold, achievements, settings
+    │   └── TerminalContext.js    # Terminal session state & history
+    ├── data/
+    │   ├── achievements.js       # Achievement & level definitions
+    │   ├── commands.js           # UNIX command metadata
+    │   ├── lessons.js            # Lesson content (EN)
+    │   ├── lessons_fr.js         # Lesson content (FR)
+    │   ├── lessons_mg.js         # Lesson content (MG)
+    │   ├── lessonsI18n.js        # Lesson i18n selector
+    │   ├── quests.js             # Quest definitions
+    │   └── zones.js              # Zone data & unlock order
+    ├── database/
+    │   ├── db.js                 # SQLite abstraction (Android)
+    │   └── webDb.js              # localStorage adapter (Web)
+    ├── i18n/
+    │   ├── index.js              # LanguageProvider & useLanguage hook
+    │   ├── en.js                 # English strings
+    │   ├── fr.js                 # French strings
+    │   └── mg.js                 # Malagasy strings
+    ├── navigation/
+    │   └── AppNavigator.js       # Stack + bottom-tab navigation
+    ├── screens/
+    │   ├── Auth/                 # LoginScreen, SignupScreen
+    │   ├── Home/                 # HomeScreen (hub)
+    │   ├── Lessons/              # LessonsScreen, LessonDetailScreen
+    │   ├── Practice/             # Sandbox terminal screen
+    │   ├── Profile/              # Stats, achievements, settings
+    │   ├── Quest/                # Quest gameplay screen
+    │   ├── WorldMap/             # Zone selection map
+    │   └── Zone/                 # Zone detail & quest list
+    └── utils/
+        ├── commandParser.js      # UNIX command execution engine
+        ├── icons.js              # Icon name → component mapping
+        ├── lessonExporter.js     # Lesson text-file download
+        ├── responsive.js         # Responsive layout helpers
+        └── virtualFilesystem.js  # Sandboxed in-memory filesystem
 ```
 
-## 🌐 Multilanguage Support
+## Multilanguage
 
-UNIX Kingdom supports **3 languages** out of the box:
+| Language | Code |
+| -------- | ---- |
+| English  | `en` |
+| Français | `fr` |
+| Malagasy | `mg` |
 
-| Flag | Language | Code |
-| ---- | -------- | ---- |
-| 🇬🇧   | English  | `en` |
-| 🇫🇷   | Français | `fr` |
-| 🇲🇬   | Malagasy | `mg` |
+Switch from **Profile → Settings → Language**.
 
-Switch languages from **Profile → Settings → Language**. The preference is persisted across sessions.
+### Adding a Language
 
-## 🎯 Supported Commands
-
-| Command  | Description              | Difficulty |
-| -------- | ------------------------ | ---------- |
-| `pwd`    | Print working directory  | ⭐          |
-| `ls`     | List directory contents  | ⭐          |
-| `cd`     | Change directory         | ⭐          |
-| `cat`    | View file contents       | ⭐          |
-| `mkdir`  | Create directory         | ⭐          |
-| `touch`  | Create file              | ⭐          |
-| `echo`   | Print text               | ⭐          |
-| `whoami` | Current user             | ⭐          |
-| `clear`  | Clear terminal           | ⭐          |
-| `help`   | Show help                | ⭐          |
-| `cp`     | Copy files               | ⭐⭐        |
-| `mv`     | Move/rename files        | ⭐⭐        |
-| `rm`     | Remove files/directories | ⭐⭐        |
-| `tree`   | Display directory tree   | ⭐⭐        |
-| `head`   | View first lines         | ⭐⭐        |
-| `tail`   | View last lines          | ⭐⭐        |
-| `find`   | Find files               | ⭐⭐        |
-| `wc`     | Word/line count          | ⭐⭐        |
-| `chmod`  | Change permissions       | ⭐⭐        |
-| `chown`  | Change ownership         | ⭐⭐        |
-| `ps`     | List processes           | ⭐⭐        |
-| `top`    | Process monitor          | ⭐⭐        |
-| `kill`   | Terminate process        | ⭐⭐        |
-| `grep`   | Search text patterns     | ⭐⭐⭐      |
-| `sort`   | Sort lines               | ⭐⭐⭐      |
-| `uniq`   | Remove duplicates        | ⭐⭐⭐      |
-| `sed`    | Stream editor            | ⭐⭐⭐      |
-| `awk`    | Text processing          | ⭐⭐⭐      |
-
-## 🛠️ Customization
-
-### Adding New Commands
-
-1. Add command metadata to `src/data/commands.js`:
+1. Copy `src/i18n/en.js` → `src/i18n/xx.js` and translate all keys
+2. Register in `src/i18n/index.js`:
 
    ```javascript
-   newcmd: {
-     name: 'newcmd',
-     funExplanation: 'Your fun explanation',
-     syntax: 'newcmd [options]',
-     examples: ['newcmd -a', 'newcmd file.txt'],
-     difficulty: 1,
-   },
+   import xx from './xx';
+   const translations = { en, fr, mg, xx };
+   export const LANGUAGES = [...existing, { code: 'xx', label: 'Name', flag: '🏳️' }];
    ```
 
-2. Implement execution logic in `src/utils/commandParser.js`:
+## Customization
 
-   ```javascript
-   case 'newcmd':
-     return handleNewCmd(args, filesystem, currentPath);
-   ```
+### Adding Commands
 
-### Adding New Quests
+1. Add metadata to `src/data/commands.js`
+2. Add execution logic to `src/utils/commandParser.js`
 
-Add quest data to `src/data/quests.js`:
+### Adding Quests
 
 ```javascript
-'new_quest_id': {
-  id: 'new_quest_id',
+// src/data/quests.js
+'quest_id': {
+  id: 'quest_id',
   name: 'Quest Name',
   zoneId: 'village',
-  description: 'Quest description',
+  description: 'Description',
   objectives: [
-    { id: 'obj1', description: 'Task 1', command: 'pwd' },
-    { id: 'obj2', description: 'Task 2', command: 'ls' },
+    { id: 'obj1', description: 'Task', command: 'ls' },
   ],
   xpReward: 100,
   goldReward: 10,
 }
 ```
 
-### Adding a New Language
+## Tech Stack
 
-1. Create a new translation file `src/i18n/xx.js` (copy `en.js` as template)
-2. Translate all keys
-3. Register in `src/i18n/index.js`:
+| Layer | Technology |
+| ----- | ---------- |
+| Framework | Expo SDK 51 / React Native 0.74.5 |
+| Navigation | React Navigation 6 (stack + bottom tabs) |
+| Persistence | expo-sqlite (Android), localStorage (Web) |
+| Auth | Custom (SHA-256 via crypto-js, local DB) |
+| Styling | React Native StyleSheet + responsive helpers |
+| Build | Gradle 8.8 (local) / EAS Build (cloud) |
+| Icons | @expo/vector-icons (Feather, MaterialCommunityIcons) |
 
-   ```javascript
-   import xx from './xx';
-   const translations = { en, fr, mg, xx };
+## Planned Features
 
-   export const LANGUAGES = [
-     ...existing,
-     { code: 'xx', label: 'Language Name', flag: '🏳️' },
-   ];
-   ```
+- [ ] Daily quests with rotating challenges
+- [ ] Leaderboards
+- [ ] Cloud sync across devices
+- [ ] Shareable completion certificates
+- [ ] New zones: Streams, Variables, Cron scheduler
 
-## 🚀 Expansion Ideas
-
-### Planned Features
-
-- [ ] Multiplayer Guilds — Form learning groups with friends
-- [ ] Daily Quests — Fresh challenges every day
-- [ ] Leaderboards — Compete globally or with friends
-- [ ] Cloud Sync — Sync progress across devices
-- [ ] Certification — Earn shareable certificates
-
-### Advanced Zones (Future)
-
-- 🌊 **The Sea of Streams** — Pipes, redirects, stdin/stdout
-- 🌋 **Volcano of Variables** — Environment variables, exports
-- 🌙 **The Dark Web (safe!)** — curl, wget, basic networking
-- ❄️ **Ice Palace of Cron** — Scheduled tasks, automation
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create a branch: `git checkout -b feature/my-feature`
+3. Commit: `git commit -m 'feat: add my feature'`
+4. Push: `git push origin feature/my-feature`
 5. Open a Pull Request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Inspired by the beauty and power of UNIX systems
-- Built with ❤️ for learners everywhere
-- Special thanks to the React Native and Expo communities
+MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-**Made with ⌨️ and ☕ by RANDRIAMBOLOLONA Manitriniaina**
-
-*Happy Learning, Adventurer! 🏰*
+**By RANDRIAMBOLOLONA Manitriniaina**
+   ];

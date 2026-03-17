@@ -30,13 +30,14 @@ import { useLanguage } from '../../i18n';
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { gameStarted, startGame, completedQuests, unlockedZones, currentQuest } = useGame();
+  const { gameStarted, startGame, completedQuests, unlockedZones, currentQuest, isLoading: gameLoading } = useGame();
   const { level, playerName, updateStreak } = usePlayer();
   const { currentUser } = useAuth();
   const { layout, fonts, spacing, isTablet, isDesktop, maxContentWidth } = useResponsive();
   const { t } = useLanguage();
   const [showWelcome, setShowWelcome] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
+  const welcomeShown = React.useRef(false);
 
   useEffect(() => {
     // Fade in animation
@@ -48,12 +49,18 @@ const HomeScreen = ({ navigation }) => {
 
     // Update streak on app open
     updateStreak();
-
-    // Show welcome dialog for new players
-    if (!gameStarted) {
-      setTimeout(() => setShowWelcome(true), 500);
-    }
   }, []);
+
+  // Show welcome dialog only after game state has loaded from DB,
+  // and only for first-time players (gameStarted === false).
+  useEffect(() => {
+    if (!gameLoading && !welcomeShown.current) {
+      welcomeShown.current = true;
+      if (!gameStarted) {
+        setTimeout(() => setShowWelcome(true), 500);
+      }
+    }
+  }, [gameLoading, gameStarted]);
 
   const handleStartGame = () => {
     startGame();

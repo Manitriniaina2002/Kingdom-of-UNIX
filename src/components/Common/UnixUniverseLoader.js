@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   Animated,
   Easing,
   useWindowDimensions,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -24,6 +24,7 @@ const orbitIcons = ['terminal', 'code', 'database', 'cpu', 'server', 'hard-drive
 
 const UnixUniverseLoader = ({ onFinish }) => {
   const { width, height } = useWindowDimensions();
+  const logoSize = Math.min(width, height) * 0.72;
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const bgPulse = useRef(new Animated.Value(0)).current;
@@ -47,17 +48,6 @@ const UnixUniverseLoader = ({ onFinish }) => {
     }, 300);
     return () => clearInterval(interval);
   }, [loading, onFinish]);
-
-  const loadingMessages = useMemo(() => ([
-    'Awakening the Kingdom...',
-    'Loading command arsenal...',
-    'Preparing your terminal...',
-    'Initializing file systems...',
-    'Configuring your realm...',
-    'Welcome, adventurer!',
-  ]), []);
-
-  const currentMessage = loadingMessages[Math.min(Math.floor(progress / 20), loadingMessages.length - 1)];
 
   // Starfield data
   const stars = useMemo(() => new Array(60).fill(0).map((_, i) => ({
@@ -305,25 +295,16 @@ const UnixUniverseLoader = ({ onFinish }) => {
       <View style={styles.overlay}>
         <View style={styles.panel}>
           <View style={styles.logoSection}>
-            <Text style={styles.logoEmoji}>⚔️</Text>
-            <View style={styles.iconWrapper}>
-              <View style={styles.iconGlow} />
-              <Feather name="terminal" size={36} color="#4ade80" />
+            <View style={[styles.logoStack, { width: logoSize, height: logoSize }]}>
+              <Image
+                source={require('../../../assets/unix-kingdom-logo.png')}
+                style={{ width: logoSize, height: logoSize }}
+                resizeMode="contain"
+              />
+              <View style={styles.spinnerOverlay}>
+                <ActivityIndicator size="large" color="#4ade80" />
+              </View>
             </View>
-          </View>
-
-          <View style={styles.titleBlock}>
-            <Text style={styles.title}>UNIX KINGDOM</Text>
-            <Text style={styles.subtitle}>Master the Command Line</Text>
-            <Text style={styles.version}>v1.0.0</Text>
-          </View>
-
-          <View style={styles.loaderWrapper}>
-            <ActivityIndicator size="large" color="#4ade80" />
-          </View>
-
-          <View style={styles.messageRow}>
-            <Text style={styles.messageText}>{currentMessage}</Text>
           </View>
         </View>
       </View>
@@ -336,6 +317,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#000000',
     zIndex: 1000,
+    overflow: 'hidden',
   },
   floatingCode: {
     position: 'absolute',
@@ -383,83 +365,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   panel: {
-    width: 380,
-    height: 380,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    borderRadius: 190,
-    padding: 40,
-    borderWidth: 2,
-    borderColor: 'rgba(34, 197, 94, 0.4)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoSection: {
     alignItems: 'center',
-    marginBottom: 12,
   },
-  logoEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  iconWrapper: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  logoStack: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-    borderWidth: 2,
-    borderColor: 'rgba(34, 197, 94, 0.3)',
   },
-  iconGlow: {
+  logoImage: {
+    // size set dynamically via inline style
+  },
+  spinnerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(74, 222, 128, 0.2)',
-    borderRadius: 30,
-  },
-  titleBlock: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontFamily: FONTS.terminal,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4ade80',
-    letterSpacing: 2,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontFamily: FONTS.terminal,
-    fontSize: 11,
-    color: '#86efac',
-    marginBottom: 3,
-    textAlign: 'center',
-  },
-  version: {
-    fontFamily: FONTS.terminal,
-    fontSize: 10,
-    color: '#22c55e',
-    opacity: 0.7,
-    textAlign: 'center',
-  },
-  loaderWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-  },
-  messageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-    marginBottom: 6,
-    justifyContent: 'center',
-  },
-  messageText: {
-    fontFamily: FONTS.terminal,
-    color: '#86efac',
-    fontSize: 11,
-    textAlign: 'center',
   },
 });
 

@@ -26,9 +26,8 @@ const App = () => {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" backgroundColor={COLORS.background} />
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, overflow: 'hidden' }}>
         <AnimatedBackground />
-        {showLoader && <UnixUniverseLoader onFinish={() => setShowLoader(false)} />}
         <LanguageProvider>
           <ToastProvider>
             <AuthProvider>
@@ -36,7 +35,7 @@ const App = () => {
                 <PlayerProvider>
                   <TerminalProvider>
                     <LessonProvider>
-                      <AppNavigator />
+                      {!showLoader && <AppNavigator />}
                     </LessonProvider>
                   </TerminalProvider>
                 </PlayerProvider>
@@ -44,6 +43,7 @@ const App = () => {
             </AuthProvider>
           </ToastProvider>
         </LanguageProvider>
+        {showLoader && <UnixUniverseLoader onFinish={() => setShowLoader(false)} />}
       </View>
     </SafeAreaProvider>
   );

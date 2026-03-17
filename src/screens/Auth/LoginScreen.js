@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -119,7 +120,11 @@ export default function LoginScreen({ navigation }) {
 
         {/* Header */}
         <View style={styles.headerSection}>
-          <Text style={[styles.logo, { fontSize: fonts.title }]}>⚔️</Text>
+          <Image
+            source={require('../../../assets/unix-kingdom-logo.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={[styles.title, { fontSize: fonts.xxxl }]}>{t('common.appTitle')}</Text>
           <Text style={[styles.subtitle, { fontSize: fonts.md }]}>
             {t('auth.masterTerminal')}
@@ -219,7 +224,15 @@ export default function LoginScreen({ navigation }) {
                   disabled={loading}
                 >
                   <View style={styles.userAvatar}>
-                    <Text style={styles.userAvatarText}>{user.avatar || '🧙'}</Text>
+                    {user.avatar === '⚔️' || user.avatar === '__UNIX_LOGO__' ? (
+                      <Image
+                        source={require('../../../assets/unix-kingdom-logo.png')}
+                        style={styles.userAvatarLogo}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Text style={styles.userAvatarText}>{user.avatar || '🧙'}</Text>
+                    )}
                   </View>
                   <View style={styles.userInfo}>
                     <Text style={[styles.userName, { fontSize: fonts.md }]}>{user.displayName}</Text>
@@ -265,6 +278,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xxl,
   },
   logo: {
+    marginBottom: SPACING.sm,
+  },
+  logoImage: {
+    width: 64,
+    height: 64,
     marginBottom: SPACING.sm,
   },
   title: {
@@ -391,6 +409,10 @@ const styles = StyleSheet.create({
   },
   userAvatarText: {
     fontSize: 20,
+  },
+  userAvatarLogo: {
+    width: 26,
+    height: 26,
   },
   userInfo: {
     flex: 1,

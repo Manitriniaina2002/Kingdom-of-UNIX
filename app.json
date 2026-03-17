@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "UNIX Kingdom",
+    "name": "unix-kingdom",
     "slug": "unix-kingdom",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/unix-kingdom-logo.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/unix-kingdom-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#0D1117"
     },
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/unix-kingdom-logo.png",
         "backgroundColor": "#0D1117"
       },
       "package": "com.unixkingdom.app",
@@ -30,8 +30,9 @@
     "scheme": "unixkingdom",
     "extra": {
       "eas": {
-        "projectId": "unix-kingdom"
+        "projectId": "451407f8-380f-4a47-86aa-99589a69f031"
       }
-    }
+    },
+    "owner": "manitriniaina2002"
   }
 }
